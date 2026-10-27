@@ -1,0 +1,1059 @@
+.project-detail.hejiang-museum-detail {
+  --hj-red: #6f1f19;
+  --hj-ember: #d66e23;
+  --hj-warm: #e9e1d6;
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+.project-detail.standard-project-detail {
+  --hj-red: #6f1f19;
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+.hejiang-museum-detail .line-network,
+.standard-project-detail .line-network {
+  color: rgba(111, 31, 25, 0.12);
+}
+
+.hj-topbar {
+  border-bottom-color: var(--color-line-strong);
+}
+
+.hj-hero {
+  padding-bottom: clamp(8rem, 13vw, 14rem);
+  padding-top: clamp(4rem, 7vw, 7.5rem);
+}
+
+.hj-hero-meta {
+  align-items: baseline;
+  border-bottom: var(--line-weight) solid var(--color-line-strong);
+  display: grid;
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  letter-spacing: 0.055em;
+  padding-bottom: 0.85rem;
+  text-transform: uppercase;
+}
+
+.hj-hero-meta > span {
+  border-left: var(--line-weight) solid var(--color-line);
+  margin-left: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.hj-hero-meta .eyebrow {
+  color: var(--hj-red);
+  margin: 0;
+}
+
+.hj-hero-title {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(9rem, 0.22fr) minmax(0, 0.78fr);
+  padding-top: clamp(2.5rem, 4.5vw, 5rem);
+}
+
+.hj-hero-title > p {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  letter-spacing: 0.055em;
+  margin: 0.55rem 0 0;
+  text-transform: uppercase;
+}
+
+.hj-hero-title h1 {
+  font-size: clamp(4.8rem, 8.25vw, 9rem);
+  font-weight: 400;
+  letter-spacing: -0.085em;
+  line-height: 0.84;
+  margin: 0;
+  max-width: 14ch;
+}
+
+.hj-hero-deck {
+  display: grid;
+  gap: clamp(2rem, 4vw, 5.5rem);
+  grid-template-columns: minmax(9rem, 0.22fr) minmax(0, 0.78fr);
+  margin-top: clamp(3.5rem, 7vw, 7rem);
+}
+
+.hj-hero-role {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  letter-spacing: 0.03em;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 28ch;
+  text-transform: uppercase;
+}
+
+.hj-hero-proposition {
+  font-size: clamp(1.75rem, 3vw, 3.4rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+  margin: 0;
+  max-width: 24ch;
+}
+
+.hj-technical-strip {
+  border-bottom: var(--line-weight) solid var(--color-line-strong);
+  border-top: var(--line-weight) solid var(--color-line-strong);
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  letter-spacing: 0.045em;
+  margin-top: clamp(3rem, 5vw, 5.5rem);
+  padding: 0.9rem 0;
+  text-transform: uppercase;
+}
+
+.hj-technical-strip span {
+  color: var(--hj-ember);
+  margin: 0 0.65rem;
+}
+
+.hj-hero-figure {
+  margin: clamp(2rem, 3.2vw, 3.75rem) 0 0;
+}
+
+.hj-hero-figure img {
+  aspect-ratio: 24 / 13;
+  background: #1f1712;
+  height: auto;
+  object-fit: cover;
+  width: 100%;
+}
+
+.hj-hero-figure figcaption,
+.hj-sheet-list figcaption {
+  border-top: var(--line-weight) solid var(--color-line-strong);
+  display: grid;
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 0.32fr) minmax(0, 0.68fr);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  padding-top: 0.75rem;
+  text-transform: uppercase;
+}
+
+.hj-hero-figure figcaption span,
+.hj-sheet-list figcaption span {
+  color: var(--hj-red);
+}
+
+.hj-hero-figure figcaption p,
+.hj-sheet-list figcaption p {
+  color: var(--color-muted);
+  margin: 0;
+  max-width: 74ch;
+}
+
+.hj-introduction,
+.hj-portfolio,
+.hj-contribution {
+  border-top: var(--line-weight) solid var(--color-line-strong);
+  padding-bottom: clamp(9rem, 15vw, 16rem);
+  padding-top: clamp(2.5rem, 4vw, 4.25rem);
+}
+
+.hj-section-heading {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(9rem, 0.22fr) minmax(0, 0.52fr) minmax(15rem, 0.26fr);
+}
+
+.hj-section-heading .eyebrow {
+  color: var(--hj-red);
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  letter-spacing: 0.055em;
+  margin: 0.45rem 0 0;
+  text-transform: uppercase;
+}
+
+.hj-section-heading h2 {
+  font-size: clamp(2.05rem, 3.35vw, 4.3rem);
+  font-weight: 400;
+  letter-spacing: -0.065em;
+  line-height: 0.92;
+  margin: 0;
+  max-width: 13ch;
+}
+
+.hj-section-heading > p:last-child {
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  margin: 0.25rem 0 0;
+  max-width: 48ch;
+}
+
+.hj-introduction-grid {
+  display: grid;
+  gap: clamp(2rem, 4vw, 5rem);
+  grid-template-columns: minmax(9rem, 0.22fr) minmax(0, 0.39fr) minmax(0, 0.39fr);
+  margin-top: clamp(5rem, 8vw, 8rem);
+}
+
+.hj-lead {
+  font-size: clamp(1.2rem, 1.9vw, 2rem);
+  grid-column: 2;
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+  margin: 0;
+  max-width: 23ch;
+}
+
+.hj-body-copy {
+  display: grid;
+  gap: 1.25rem;
+  grid-column: 3;
+}
+
+.hj-body-copy p {
+  color: var(--color-muted);
+  margin: 0;
+  max-width: 58ch;
+}
+
+.hj-facts {
+  border-bottom: var(--line-weight) solid var(--color-line-strong);
+  border-top: var(--line-weight) solid var(--color-line-strong);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: clamp(4rem, 7vw, 7rem);
+}
+
+.hj-facts div {
+  display: grid;
+  gap: 1.5rem;
+  min-height: 8.5rem;
+  padding: 1rem 1.25rem 1.4rem 0;
+}
+
+.hj-facts div + div {
+  border-left: var(--line-weight) solid var(--color-line);
+  padding-left: 1.25rem;
+}
+
+.hj-facts span,
+.hj-narrative-index,
+.hj-scope-note span {
+  color: var(--hj-red);
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  font-style: normal;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.hj-facts strong {
+  align-self: end;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.hj-narrative {
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-left: 22%;
+  margin-top: clamp(4rem, 6vw, 6.5rem);
+}
+
+.hj-narrative article {
+  border-top: var(--line-weight) solid var(--color-line-strong);
+  min-height: 18rem;
+  padding: 1rem 1.4rem 2rem 0;
+}
+
+.hj-narrative article + article {
+  border-left: var(--line-weight) solid var(--color-line);
+  padding-left: 1.4rem;
+}
+
+.hj-narrative-index {
+  display: flex;
+  justify-content: space-between;
+}
+
+.hj-narrative-index i {
+  color: var(--color-muted);
+  font-style: normal;
+}
+
+.hj-narrative h3 {
+  font-size: clamp(1.35rem, 2vw, 2.2rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 4rem 0 1.25rem;
+}
+
+.hj-narrative p {
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 34ch;
+}
+
+.hj-portfolio {
+  background: linear-gradient(180deg, rgba(233, 225, 214, 0.38), rgba(247, 247, 245, 0) 38rem);
+}
+
+.hj-sheet-list {
+  display: grid;
+  gap: clamp(6rem, 10vw, 10rem);
+  margin-top: clamp(5rem, 8vw, 8rem);
+}
+
+.hj-sheet-list figure {
+  margin: 0;
+}
+
+.hj-sheet-list img {
+  background: #ddd;
+  height: auto;
+  width: 100%;
+}
+
+.hj-sheet-list figcaption {
+  margin-top: 1rem;
+}
+
+.hj-contribution {
+  padding-bottom: clamp(7rem, 11vw, 11rem);
+}
+
+.hj-contribution-copy {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 7rem);
+  grid-template-columns: minmax(0, 0.58fr) minmax(15rem, 0.42fr);
+  margin-left: 22%;
+  margin-top: clamp(5rem, 8vw, 8rem);
+}
+
+.hj-contribution-copy > p:first-child {
+  font-size: clamp(1.2rem, 1.9vw, 2rem);
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+  margin: 0;
+  max-width: 34ch;
+}
+
+.hj-scope-note {
+  border-top: var(--line-weight) solid var(--color-line-strong);
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 1rem;
+}
+
+.hj-scope-note span {
+  display: block;
+  margin-bottom: 2rem;
+}
+
+.hj-next {
+  border-top-color: var(--color-line-strong);
+}
+
+@media (max-width: 1050px) {
+  .hj-section-heading {
+    grid-template-columns: minmax(8rem, 0.25fr) minmax(0, 0.75fr);
+  }
+
+  .hj-section-heading > p:last-child {
+    grid-column: 2;
+  }
+
+  .hj-introduction-grid {
+    grid-template-columns: minmax(8rem, 0.25fr) minmax(0, 0.75fr);
+  }
+
+  .hj-lead,
+  .hj-body-copy {
+    grid-column: 2;
+  }
+
+  .hj-body-copy {
+    margin-top: 1rem;
+  }
+
+  .hj-narrative,
+  .hj-contribution-copy {
+    margin-left: 25%;
+  }
+}
+
+@media (max-width: 760px) {
+  .hj-hero {
+    padding-bottom: 7rem;
+    padding-top: 2.5rem;
+  }
+
+  .hj-hero-meta {
+    gap: 0.55rem 1rem;
+    grid-template-columns: 1fr auto;
+  }
+
+  .hj-hero-meta .eyebrow {
+    grid-column: 1 / -1;
+  }
+
+  .hj-hero-meta > span {
+    border-left: 0;
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .hj-hero-meta > span:last-child {
+    text-align: right;
+  }
+
+  .hj-hero-title,
+  .hj-hero-deck {
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .hj-hero-title h1 {
+    font-size: clamp(3.45rem, 16.7vw, 6.2rem);
+    line-height: 0.87;
+    overflow-wrap: anywhere;
+  }
+
+  .hj-hero-deck {
+    margin-top: 3.75rem;
+  }
+
+  .hj-technical-strip {
+    line-height: 1.7;
+  }
+
+  .hj-hero-figure figcaption,
+  .hj-sheet-list figcaption,
+  .hj-section-heading,
+  .hj-introduction-grid,
+  .hj-contribution-copy {
+    grid-template-columns: 1fr;
+  }
+
+  .hj-section-heading > p:last-child,
+  .hj-lead,
+  .hj-body-copy {
+    grid-column: 1;
+  }
+
+  .hj-section-heading {
+    gap: 1.75rem;
+  }
+
+  .hj-section-heading h2 {
+    max-width: 15ch;
+  }
+
+  .hj-introduction-grid {
+    margin-top: 4rem;
+  }
+
+  .hj-facts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hj-facts div {
+    min-height: 7.5rem;
+  }
+
+  .hj-facts div:nth-child(odd) {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .hj-facts div:nth-child(even) {
+    border-left: var(--line-weight) solid var(--color-line);
+    padding-left: 1rem;
+  }
+
+  .hj-facts div:nth-child(n + 3) {
+    border-top: var(--line-weight) solid var(--color-line);
+  }
+
+  .hj-narrative {
+    grid-template-columns: 1fr;
+    margin-left: 0;
+    margin-top: 4rem;
+  }
+
+  .hj-narrative article {
+    min-height: 0;
+    padding: 1rem 0 3.25rem;
+  }
+
+  .hj-narrative article + article {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .hj-narrative h3 {
+    margin-top: 2.75rem;
+  }
+
+  .hj-sheet-list {
+    gap: 5.5rem;
+    margin-top: 4rem;
+  }
+
+  .hj-contribution-copy {
+    margin-left: 0;
+    margin-top: 4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hj-hero-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .hj-hero-meta > span:last-child {
+    text-align: left;
+  }
+
+  .hj-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .hj-facts div,
+  .hj-facts div:nth-child(even),
+  .hj-facts div:nth-child(odd) {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .hj-facts div + div {
+    border-top: var(--line-weight) solid var(--color-line);
+  }
+}
+
+/* Simplified case-study layout: text is limited to the hero, overview and reflection. */
+.hj-hero {
+  padding-bottom: clamp(2.4rem, 3.6vw, 3.9rem);
+}
+
+.hj-hero-proposition {
+  max-width: 25ch;
+}
+
+.hj-hero-figure {
+  margin-top: clamp(3.5rem, 6vw, 6rem);
+}
+
+.hj-introduction,
+.hj-reflection {
+  border-top: var(--line-weight) solid var(--color-line-strong);
+  padding-bottom: clamp(8rem, 12vw, 13rem);
+  padding-top: clamp(2.5rem, 4vw, 4.25rem);
+}
+
+.hj-introduction {
+  padding-bottom: calc(clamp(3.5rem, 5vw, 5.5rem) + 40px);
+  padding-top: clamp(2rem, 3vw, 3rem);
+}
+
+.hj-section-heading {
+  grid-template-columns: minmax(9rem, 0.22fr) minmax(0, 0.78fr);
+}
+
+.hj-section-heading h2 {
+  max-width: 15ch;
+}
+
+.hj-reflection-copy {
+  font-size: clamp(1.2rem, 1.9vw, 2rem);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: clamp(5rem, 8vw, 8rem) 0 0 22%;
+  max-width: 43ch;
+}
+
+.hj-reflection .hj-section-heading {
+  gap: 0;
+  grid-template-columns: 22% minmax(0, 1fr);
+}
+
+.hj-reflection .hj-section-heading h2 {
+  max-width: 20.25ch;
+}
+
+@media (min-width: 761px) {
+  .standard-project-detail--my-museum .hj-reflection .hj-section-heading h2 {
+    max-width: 34ch;
+    white-space: nowrap;
+  }
+
+  .standard-project-detail--neon-harbor .hj-reflection .hj-section-heading h2 {
+    max-width: 24.5025ch;
+  }
+}
+
+.hj-overview-body {
+  --hj-overview-gap: clamp(3rem, 6vw, 7rem);
+  display: grid;
+  gap: var(--hj-overview-gap);
+  grid-template-columns: minmax(0, 559fr) minmax(20rem, 441fr);
+  margin-top: 0;
+}
+
+.hj-overview-copy .hj-section-heading {
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+.hj-overview-copy .hj-section-heading h2 {
+  font-size: clamp(1.55rem, 2.3vw, 2.9rem);
+  max-width: 25.5ch;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-overview-copy .hj-section-heading h2 {
+  max-width: none;
+}
+
+.hj-author-intro {
+  font-size: clamp(0.98rem, 1.15vw, 1.18rem);
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+  margin: 0;
+  max-width: none;
+}
+
+.hj-overview-copy .hj-author-intro {
+  margin-top: clamp(2rem, 3vw, 3rem);
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-overview-copy .hj-author-intro {
+  line-height: 1.35;
+  margin-top: clamp(1.3rem, 1.95vw, 1.95rem);
+}
+
+@media (min-width: 761px) {
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-overview-copy .hj-author-intro {
+    width: min(
+      105%,
+      calc(100% + var(--hj-overview-gap) - var(--line-weight))
+    );
+  }
+}
+
+.hj-project-data {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  margin: clamp(5rem, 8vw, 8rem) 0 0;
+}
+
+.hj-overview-body .hj-project-data {
+  border-left: var(--line-weight) solid var(--color-line-strong);
+  display: block;
+  margin: 0;
+  padding-bottom: 5px;
+  padding-left: clamp(1.5rem, 2.5vw, 3rem);
+}
+
+.hj-project-data > div {
+  border-top: var(--line-weight) solid var(--color-line-strong);
+  display: grid;
+  gap: 2.5rem;
+  margin: 0;
+  min-height: 10rem;
+  padding: 1rem 1.35rem 1.5rem 0;
+}
+
+.hj-overview-body .hj-project-data > div {
+  border-left: 0;
+  gap: 1rem;
+  grid-column: auto;
+  grid-template-columns: minmax(6.75rem, 0.42fr) minmax(0, 0.58fr);
+  min-height: 0;
+  padding: 0.8rem 0 !important;
+}
+
+.hj-project-data dt {
+  color: var(--hj-red);
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.hj-project-data dd {
+  align-self: end;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 48ch;
+}
+
+.hj-overview-body .hj-project-data dd {
+  align-self: start;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.hj-data-time,
+.hj-data-nature {
+  grid-column: span 3;
+}
+
+.hj-data-type {
+  grid-column: span 6;
+}
+
+.hj-data-stages {
+  grid-column: span 4;
+}
+
+.hj-data-responsibilities {
+  grid-column: span 6;
+}
+
+.hj-data-result {
+  grid-column: span 2;
+}
+
+.hj-data-nature,
+.hj-data-type,
+.hj-data-responsibilities,
+.hj-data-result {
+  border-left: var(--line-weight) solid var(--color-line);
+  padding-left: 1.35rem !important;
+}
+
+.hj-portfolio {
+  background: none;
+  border-top: 0;
+  padding: 0 0 clamp(8rem, 12vw, 13rem);
+}
+
+.hj-sheet-list {
+  gap: 18px;
+  margin-top: 0;
+}
+
+.hj-sheet-list figure {
+  border-bottom: var(--line-weight) solid var(--color-line-strong);
+  padding-bottom: 15px;
+}
+
+.hj-sheet-list .hj-sheet-title {
+  border-top: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  margin: 0 0 7px;
+  padding: 0;
+}
+
+.hj-sheet-list .hj-sheet-title p {
+  color: var(--color-ink);
+  max-width: none;
+}
+
+.standard-sheet-placeholder {
+  aspect-ratio: 3200 / 2227;
+  background:
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px),
+    #dededb;
+  background-size: 12.5% 12.5%;
+  color: var(--color-muted);
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+.standard-sheet-placeholder span {
+  color: var(--hj-red);
+  font-family: var(--font-mono);
+  font-size: 0.713rem;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.standard-sheet-placeholder p {
+  font-size: 0.9375rem;
+  margin: 0.65rem 0 0;
+}
+
+.hj-reflection {
+  padding-bottom: clamp(7rem, 11vw, 11rem);
+}
+
+.hj-reflection-copy {
+  max-width: 44ch;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-portfolio {
+  padding-bottom: 0;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-reflection {
+  border-top: 0;
+  padding-bottom: clamp(3.15rem, 4.95vw, 4.95rem);
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-reflection-copy {
+  font-size: clamp(1.075rem, calc(1.9vw - 2px), 1.875rem);
+  margin-top: clamp(3.25rem, 5.2vw, 5.2rem);
+}
+
+.standard-project-detail--my-museum .hj-reflection-copy {
+  max-width: 47.08ch;
+}
+
+@media (max-width: 1050px) {
+  .hj-reflection .hj-section-heading {
+    grid-template-columns: 25% minmax(0, 1fr);
+  }
+
+  .hj-reflection-copy {
+    margin-left: 25%;
+  }
+
+  .hj-overview-body {
+    --hj-overview-gap: 3rem;
+    gap: var(--hj-overview-gap);
+    grid-template-columns: minmax(0, 559fr) minmax(18rem, 441fr);
+  }
+
+  .hj-data-time,
+  .hj-data-nature,
+  .hj-data-result {
+    grid-column: span 4;
+  }
+
+  .hj-data-type,
+  .hj-data-stages,
+  .hj-data-responsibilities {
+    grid-column: span 6;
+  }
+
+  .hj-data-stages {
+    border-left: 0;
+    padding-left: 0 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .hj-reflection .hj-section-heading {
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .hj-section-heading {
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .hj-section-heading h2 {
+    max-width: 16ch;
+  }
+
+  .hj-reflection-copy {
+    margin-left: 0;
+    margin-top: 4rem;
+  }
+
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-reflection-copy {
+    margin-top: 2.6rem;
+  }
+
+  .hj-overview-body {
+    gap: 3rem;
+    grid-template-columns: 1fr;
+    margin-top: 0;
+  }
+
+  .hj-author-intro {
+    margin: 0;
+  }
+
+  .hj-overview-body .hj-project-data {
+    border-left: 0;
+    margin: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+  }
+
+  .hj-project-data > div,
+  .hj-data-time,
+  .hj-data-nature,
+  .hj-data-type,
+  .hj-data-stages,
+  .hj-data-responsibilities,
+  .hj-data-result {
+    border-left: 0;
+    grid-column: 1;
+    min-height: 0;
+    padding: 1rem 0 2.25rem !important;
+  }
+
+  .hj-project-data > div {
+    gap: 1.5rem;
+  }
+
+  .hj-overview-body .hj-project-data > div {
+    gap: 1rem;
+    grid-template-columns: minmax(7rem, 0.38fr) minmax(0, 0.62fr);
+    padding: 0.85rem 0 !important;
+  }
+
+  .hj-sheet-list.page-shell {
+    width: calc(100% - 16px);
+  }
+
+  .hj-sheet-list {
+    gap: 1rem;
+    margin-top: 0;
+  }
+
+  .hj-sheet-list figure {
+    padding-bottom: 0.75rem;
+  }
+
+  .hj-sheet-list .hj-sheet-title {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    margin-bottom: 0.45rem;
+  }
+}
+
+/* Hejiang and the standard case-study template share the approved opening composition. */
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero {
+  padding-bottom: clamp(8rem, 13vw, 14rem);
+  padding-top: clamp(1.305rem, 2.088vw, 2.349rem);
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-meta {
+  align-items: start;
+  border-bottom: 0;
+  gap: 1rem;
+  letter-spacing: 0.02em;
+  padding-bottom: 0;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-meta > span {
+  border-left: 0;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-meta .eyebrow {
+  color: inherit;
+  font-size: inherit;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-title {
+  align-items: start;
+  grid-template-columns: 1fr 4fr;
+  margin-top: clamp(4rem, 9vw, 9rem);
+  padding-top: 0;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-title > p {
+  letter-spacing: normal;
+  margin: 0;
+  max-width: 22ch;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-title h1 {
+  font-size: clamp(4.8rem, 9vw, 9.8rem);
+  line-height: 0.78;
+  max-width: 9ch;
+}
+
+.standard-project-detail--penguin-island .hj-hero-title h1 {
+  max-width: 10.35ch;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-deck {
+  gap: 2rem;
+  grid-template-columns: 1fr 1.5fr;
+  margin: clamp(4rem, 8vw, 8rem) 0 clamp(3rem, 6vw, 6rem) 20%;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-role {
+  align-self: end;
+  letter-spacing: normal;
+  max-width: 44ch;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-proposition {
+  max-width: 22ch;
+}
+
+.standard-project-detail--t-rollerrent .hj-hero-proposition {
+  white-space: pre-line;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-technical-strip {
+  letter-spacing: 0.02em;
+  margin-top: 0;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: space-between;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-keywords span {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+:is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-figure {
+  margin-top: clamp(2rem, 4vw, 4rem);
+}
+
+@media (max-width: 760px) {
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-hero {
+    padding-bottom: 8rem;
+    padding-top: 1.044rem;
+  }
+
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-meta {
+    grid-template-columns: 1fr;
+  }
+
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-title {
+    display: block;
+    margin-top: 4rem;
+  }
+
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-title > p {
+    margin-bottom: 1rem;
+  }
+
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-title h1 {
+    font-size: clamp(3.8rem, 18vw, 6.4rem);
+    line-height: 0.8;
+  }
+
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-deck {
+    grid-template-columns: 1fr;
+    margin: 4rem 0 3rem;
+  }
+
+  :is(.hejiang-museum-detail, .standard-project-detail) .hj-hero-proposition {
+    grid-row: 1;
+  }
+}

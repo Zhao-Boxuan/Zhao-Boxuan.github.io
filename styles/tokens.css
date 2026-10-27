@@ -1,0 +1,37 @@
+:root {
+  --color-bg: #f7f7f5;
+  --color-surface: rgba(255, 255, 255, 0.72);
+  --color-paper: #ffffff;
+  --color-ink: #101112;
+  --color-muted: #686b6d;
+  --color-sans-primary: #1a1a1a;
+  --color-sans-secondary: #949494;
+  --color-sans-tertiary: #c2c2be;
+  --color-line: rgba(16, 17, 18, 0.13);
+  --color-line-strong: rgba(16, 17, 18, 0.48);
+  --color-line-ghost: rgba(16, 17, 18, 0.075);
+  --color-line-tech: rgba(16, 17, 18, 0.22);
+  --line-weight: 1.5px;
+  --line-weight-strong: 2px;
+  --color-ice: #dce7e8;
+  --color-smoke: #d7d6d1;
+  --font-sans: Arial, "Helvetica Neue", "PingFang SC", sans-serif;
+  --font-mono: "Courier New", "Nimbus Mono PS", Consolas, monospace;
+  --space-1: 0.5rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+  --space-7: 4.5rem;
+  --space-8: 7rem;
+  --section-space: clamp(7rem, 12vw, 13rem);
+  --radius-sm: 0.15rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --max-width: 1700px;
+  --shell-gutter: max(32px, calc((100vw - var(--max-width)) / 2));
+  --nav-height: 66px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-directory: cubic-bezier(0.16, 1, 0.3, 1);
+}

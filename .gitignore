@@ -1,0 +1,17 @@
+node_modules
+.stalled-node_modules
+.pnpm-store
+.next
+.next-pages
+.vinext
+dist
+.wrangler
+.preview-logs
+tmp
+output
+artifacts
+tsconfig.tsbuildinfo
+.env*
+!.env.example
+*.log
+.DS_Store

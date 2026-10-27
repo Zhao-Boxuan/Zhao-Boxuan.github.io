@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2440 1680" role="img" aria-labelledby="title desc">
+  <title id="title">P4 Xiangzi Temple District site analysis</title>
+  <desc id="desc">Four diagrams showing historic city context, protection constraints, site relationships and the height-control section.</desc>
+  <image href="p4-01-historic-city-context.svg" x="0" y="0" width="1200" height="820"/>
+  <image href="p4-03-site-relationship.svg" x="1240" y="0" width="1200" height="820"/>
+  <image href="p4-04-control-section.svg" x="0" y="860" width="1200" height="820"/>
+  <image href="p4-02-protection-constraint.svg" x="1240" y="860" width="1200" height="820"/>
+</svg>
