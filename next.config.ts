@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   ...(isGitHubPagesBuild
     ? {
         output: 'export' as const,
-        distDir: '.next-pages',
         trailingSlash: true,
         images: { unoptimized: true },
       }
