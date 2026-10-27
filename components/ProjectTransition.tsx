@@ -23,18 +23,25 @@ const ProjectTransitionContext = createContext<ProjectTransitionContextValue | n
 const PROJECT_PATH_PREFIX = '/projects/';
 const TRANSITION_CIRCLE_LENGTH = 2 * Math.PI * 47;
 
+function normalizePathname(pathname: string) {
+  const normalized = pathname.replace(/\/{2,}/g, '/').replace(/\/+$/, '');
+  return normalized || '/';
+}
+
 function isPortfolioRoute(pathname: string) {
-  return pathname === '/' || pathname.startsWith(PROJECT_PATH_PREFIX);
+  const normalizedPathname = normalizePathname(pathname);
+  return normalizedPathname === '/' || normalizedPathname.startsWith(PROJECT_PATH_PREFIX);
 }
 
 function projectSlugFromPath(pathname: string) {
-  if (!pathname.startsWith(PROJECT_PATH_PREFIX)) return null;
-  return pathname.slice(PROJECT_PATH_PREFIX.length).split('/')[0] || null;
+  const normalizedPathname = normalizePathname(pathname);
+  if (!normalizedPathname.startsWith(PROJECT_PATH_PREFIX)) return null;
+  return normalizedPathname.slice(PROJECT_PATH_PREFIX.length).split('/')[0] || null;
 }
 
 function getPathname(href: string) {
-  if (typeof window === 'undefined') return href.split(/[?#]/)[0] || '/';
-  return new URL(href, window.location.origin).pathname;
+  if (typeof window === 'undefined') return normalizePathname(href.split(/[?#]/)[0] || '/');
+  return normalizePathname(new URL(href, window.location.origin).pathname);
 }
 
 export function useProjectTransition() {
@@ -58,7 +65,7 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
   const minimumReachedRef = useRef(false);
   const routeReadyRef = useRef(false);
   const expectedPathRef = useRef<string | null>(null);
-  const currentPathRef = useRef(pathname);
+  const currentPathRef = useRef(normalizePathname(pathname));
   const transitionSequenceRef = useRef(0);
   const progressRef = useRef({ value: 0 });
   const lastPercentageRef = useRef(-1);
@@ -204,9 +211,10 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
   }, [router, setPercentage, waitForDestination]);
 
   useLayoutEffect(() => {
-    currentPathRef.current = pathname;
-    if (!activeRef.current || pathname !== expectedPathRef.current) return;
-    void waitForDestination(pathname, transitionSequenceRef.current);
+    const normalizedPathname = normalizePathname(pathname);
+    currentPathRef.current = normalizedPathname;
+    if (!activeRef.current || normalizedPathname !== expectedPathRef.current) return;
+    void waitForDestination(normalizedPathname, transitionSequenceRef.current);
   }, [pathname, waitForDestination]);
 
   useEffect(() => {
@@ -260,7 +268,7 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
   useEffect(() => {
     const handlePopState = () => {
       const previousPath = currentPathRef.current;
-      const destinationPath = window.location.pathname;
+      const destinationPath = normalizePathname(window.location.pathname);
       if (
         previousPath === destinationPath
         || !isPortfolioRoute(previousPath)

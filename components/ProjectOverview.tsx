@@ -6,24 +6,24 @@ import gsap from 'gsap';
 import type { Language } from '@/types/content';
 
 const overviewMedia = [
-  { src: '/media/project-overview/optimized/01.webp', type: 'image', alt: 'Selected work 01' },
-  { src: '/media/project-overview/02_2.mp4', type: 'video', alt: 'Selected work 02' },
-  { src: '/media/project-overview/optimized/04_2.webp', type: 'image', alt: 'Selected work 04' },
-  { src: '/media/project-overview/optimized/17.webp', type: 'image', alt: 'Selected work 17' },
-  { src: '/media/project-overview/optimized/03.webp', type: 'image', alt: 'Selected work 03' },
-  { src: '/media/project-overview/optimized/05_3.webp', type: 'image', alt: 'Selected work 05' },
-  { src: '/media/project-overview/optimized/10.webp', type: 'image', alt: 'Selected work 10' },
-  { src: '/media/project-overview/optimized/11.webp', type: 'image', alt: 'Selected work 11' },
-  { src: '/media/project-overview/07.mp4', type: 'video', alt: 'Selected work 07' },
-  { src: '/media/project-overview/optimized/06.webp', type: 'image', alt: 'Selected work 06' },
-  { src: '/media/project-overview/optimized/08_2.webp', type: 'image', alt: 'Selected work 08' },
-  { src: '/media/project-overview/09.mp4', type: 'video', alt: 'Selected work 09' },
-  { src: '/media/project-overview/optimized/16.webp', type: 'image', alt: 'Selected work 16' },
-  { src: '/media/project-overview/optimized/12.webp', type: 'image', alt: 'Selected work 12' },
-  { src: '/media/project-overview/optimized/13.webp', type: 'image', alt: 'Selected work 13' },
-  { src: '/media/project-overview/optimized/14_3.webp', type: 'image', alt: 'Selected work 14' },
-  { src: '/media/project-overview/15_2.mp4', type: 'video', alt: 'Selected work 15' },
-  { src: '/media/project-overview/optimized/18.webp', type: 'image', alt: 'Selected work 18' },
+  { src: '/media/project-overview/optimized/01.webp', type: 'image', alt: 'Selected work 01', width: 1772, height: 960 },
+  { src: '/media/project-overview/02_2.mp4', type: 'video', alt: 'Selected work 02', width: 1920, height: 1080 },
+  { src: '/media/project-overview/optimized/04_2.webp', type: 'image', alt: 'Selected work 04', width: 1692, height: 960 },
+  { src: '/media/project-overview/optimized/17.webp', type: 'image', alt: 'Selected work 17', width: 2447, height: 960 },
+  { src: '/media/project-overview/optimized/03.webp', type: 'image', alt: 'Selected work 03', width: 1440, height: 960 },
+  { src: '/media/project-overview/optimized/05_3.webp', type: 'image', alt: 'Selected work 05', width: 1505, height: 960 },
+  { src: '/media/project-overview/optimized/10.webp', type: 'image', alt: 'Selected work 10', width: 886, height: 960 },
+  { src: '/media/project-overview/optimized/11.webp', type: 'image', alt: 'Selected work 11', width: 1770, height: 960 },
+  { src: '/media/project-overview/07.mp4', type: 'video', alt: 'Selected work 07', width: 1920, height: 1080 },
+  { src: '/media/project-overview/optimized/06.webp', type: 'image', alt: 'Selected work 06', width: 1772, height: 960 },
+  { src: '/media/project-overview/optimized/08_2.webp', type: 'image', alt: 'Selected work 08', width: 1770, height: 960 },
+  { src: '/media/project-overview/09.mp4', type: 'video', alt: 'Selected work 09', width: 1320, height: 720 },
+  { src: '/media/project-overview/optimized/16.webp', type: 'image', alt: 'Selected work 16', width: 1707, height: 960 },
+  { src: '/media/project-overview/optimized/12.webp', type: 'image', alt: 'Selected work 12', width: 1440, height: 960 },
+  { src: '/media/project-overview/optimized/13.webp', type: 'image', alt: 'Selected work 13', width: 1326, height: 960 },
+  { src: '/media/project-overview/optimized/14_3.webp', type: 'image', alt: 'Selected work 14', width: 2006, height: 960 },
+  { src: '/media/project-overview/15_2.mp4', type: 'video', alt: 'Selected work 15', width: 2558, height: 1438 },
+  { src: '/media/project-overview/optimized/18.webp', type: 'image', alt: 'Selected work 18', width: 1707, height: 960 },
 ] as const;
 
 const overviewCategories = [
@@ -120,6 +120,20 @@ export function ProjectOverview({ language }: { language: Language }) {
     const setCursorX = gsap.quickSetter(cursor, 'x', 'px');
     const setCursorY = gsap.quickSetter(cursor, 'y', 'px');
 
+    const ensureMedia = (index: number) => {
+      const media = resolvedMedia[index];
+      if (!media || media.getAttribute('src')) return;
+      const source = media.dataset.src;
+      if (!source) return;
+      media.setAttribute('src', source);
+      if (media instanceof HTMLVideoElement) media.load();
+    };
+
+    const ensureMediaWindow = (active: number) => {
+      const offsets = mobile ? [-1, 0, 1, 2, 3] : [-2, -1, 0, 1, 2, 3, 4, 5, 6];
+      offsets.forEach((offset) => ensureMedia((active + offset + figures.length) % figures.length));
+    };
+
     const relativeIndex = (index: number, active: number) => {
       let relative = (index - active + figures.length) % figures.length;
       if (relative >= figures.length - 2) relative -= figures.length;
@@ -131,8 +145,10 @@ export function ProjectOverview({ language }: { language: Language }) {
       stageHeight = marquee.clientHeight;
       mobile = window.innerWidth <= 899;
       imageWidths = resolvedMedia.map((media) => {
-        const intrinsicWidth = media instanceof HTMLVideoElement ? media.videoWidth : media.naturalWidth;
-        const intrinsicHeight = media instanceof HTMLVideoElement ? media.videoHeight : media.naturalHeight;
+        const intrinsicWidth = (media instanceof HTMLVideoElement ? media.videoWidth : media.naturalWidth)
+          || Number(media.dataset.width);
+        const intrinsicHeight = (media instanceof HTMLVideoElement ? media.videoHeight : media.naturalHeight)
+          || Number(media.dataset.height);
         const ratio = intrinsicWidth > 0 && intrinsicHeight > 0
           ? intrinsicWidth / intrinsicHeight
           : 16 / 9;
@@ -252,6 +268,7 @@ export function ProjectOverview({ language }: { language: Language }) {
       videos.forEach(({ media, index }) => {
         const shouldPlay = visible && !reduceMotion && playbackIndices.has(index);
         if (shouldPlay && !playingVideos.has(media)) {
+          media.preload = 'auto';
           playingVideos.add(media);
           void media.play().then(() => {
             if (disposed || !playingVideos.has(media)) media.pause();
@@ -285,6 +302,7 @@ export function ProjectOverview({ language }: { language: Language }) {
     };
 
     const applyLayout = (active: number, animate: boolean) => {
+      ensureMediaWindow(active);
       const states = layoutFor(active);
 
       if (!animate || reduceMotion) {
@@ -293,7 +311,7 @@ export function ProjectOverview({ language }: { language: Language }) {
           Object.assign(rendered[index], states[index]);
           renderFigure(index);
         });
-        playbackIndices = new Set(states.flatMap((state, index) => state.alpha ? [index] : []));
+        playbackIndices = new Set(states.flatMap((state, index) => state.alpha && state.fraction >= 0.3 ? [index] : []));
         syncPlayback();
         return;
       }
@@ -320,7 +338,7 @@ export function ProjectOverview({ language }: { language: Language }) {
         Object.assign(rendered[index], states[index]);
         renderFigure(index);
       });
-      playbackIndices = movingSet;
+      playbackIndices = new Set(states.flatMap((state, index) => state.alpha && state.fraction >= 0.3 ? [index] : []));
 
       activeMove = gsap.timeline({
         defaults: { duration: 1, ease: 'power3.inOut' },
@@ -330,7 +348,7 @@ export function ProjectOverview({ language }: { language: Language }) {
           clearAnimationHints();
           activeIndex = active;
           activeMove = null;
-          playbackIndices = new Set(states.flatMap((state, index) => state.alpha ? [index] : []));
+          playbackIndices = new Set(states.flatMap((state, index) => state.alpha && state.fraction >= 0.3 ? [index] : []));
           queueNext();
         },
       });
@@ -622,11 +640,13 @@ export function ProjectOverview({ language }: { language: Language }) {
     // If metadata arrives after the bounded startup wait, correct the aspect ratio once.
     videos.forEach(({ media }) => media.addEventListener('loadedmetadata', refreshLayout));
 
-    const startWhenMediaAreReady = async () => {
-      await Promise.all(
-        resolvedMedia.map(waitForMedia),
-      );
-
+    let initialized = false;
+    const initializeWhenNearViewport = async () => {
+      if (initialized) return;
+      initialized = true;
+      measureLayout();
+      ensureMediaWindow(activeIndex);
+      await waitForMedia(resolvedMedia[activeIndex]);
       if (disposed) return;
       ready = true;
       measureLayout();
@@ -634,7 +654,12 @@ export function ProjectOverview({ language }: { language: Language }) {
       if (!reduceMotion) queueNext();
     };
 
-    void startWhenMediaAreReady();
+    const preloadObserver = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      preloadObserver.disconnect();
+      void initializeWhenNearViewport();
+    }, { rootMargin: '75% 0px', threshold: 0.01 });
+    preloadObserver.observe(marquee);
 
     return () => {
       disposed = true;
@@ -645,6 +670,7 @@ export function ProjectOverview({ language }: { language: Language }) {
       clearAnimationHints();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      preloadObserver.disconnect();
       window.clearTimeout(horizontalWheelResumeTimer);
       interactionPauseSources.clear();
       marquee.removeEventListener('pointerdown', beginMouseDrag);
@@ -716,26 +742,31 @@ export function ProjectOverview({ language }: { language: Language }) {
         ref={marqueeRef}
       >
         <div className="project-overview-track" ref={trackRef}>
-          {overviewMedia.map((media, mediaIndex) => (
+          {overviewMedia.map((media) => (
             <figure className="project-overview-image" key={media.src}>
               {media.type === 'video' ? (
                 <video
                   aria-label={media.alt}
                   className="project-overview-image-source"
+                  data-height={media.height}
+                  data-src={media.src}
+                  data-width={media.width}
                   loop
                   muted
                   playsInline
-                  preload="metadata"
-                  src={media.src}
+                  preload="none"
                 />
               ) : (
                 <img
                   alt={media.alt}
                   className="project-overview-image-source"
+                  data-height={media.height}
+                  data-src={media.src}
+                  data-width={media.width}
                   decoding="async"
-                  fetchPriority={mediaIndex < 3 ? 'high' : 'auto'}
-                  loading="eager"
-                  src={media.src}
+                  height={media.height}
+                  loading="lazy"
+                  width={media.width}
                 />
               )}
             </figure>

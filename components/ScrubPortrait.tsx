@@ -401,6 +401,7 @@ export function ScrubPortrait({ language }: { language: Language }) {
           muted
           onSeeked={handleVideoSeeked}
           playsInline
+          poster="/images/profile/zbx-turntable-poster-3-5s.webp"
           preload={videoSource ? 'auto' : 'none'}
           ref={videoRef}
           src={videoSource}
