@@ -852,6 +852,11 @@ export function ProjectOverview({ language }: { language: Language }) {
           ))}
         </div>
         <footer className="project-overview-footer" aria-hidden="true">
+          <span className="sar-p8-scroll-cue project-overview-scroll-cue">
+            {[0, 1, 2].map((index) => (
+              <svg key={index} preserveAspectRatio="none" viewBox="0 0 20 6"><path d="M1 1 L10 5 L19 1" /></svg>
+            ))}
+          </span>
           <span>ARCHIVE / 04 DIRECTORIES</span>
           <span className="project-overview-review">
             {language === 'en' ? 'SCROLL TO REVIEW' : '滚动浏览'}

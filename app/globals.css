@@ -2114,7 +2114,13 @@ body.project-overview-image-cursor-active .site-cursor-canvas {
   letter-spacing: 0.06em;
   margin-top: 70px;
   padding-top: 10px;
+  position: relative;
   text-transform: uppercase;
+}
+
+.project-overview-footer .project-overview-scroll-cue {
+  color: var(--color-muted);
+  top: 20px;
 }
 
 .project-overview-review {
