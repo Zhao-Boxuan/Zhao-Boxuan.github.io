@@ -45,29 +45,24 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
 
     const imageRatio = image.naturalWidth / image.naturalHeight;
     const frameRatio = rect.width / rect.height;
-    let sourceX = 0;
-    let sourceY = 0;
-    let sourceWidth = image.naturalWidth;
-    let sourceHeight = image.naturalHeight;
+    let drawWidth = columns;
+    let drawHeight = rows;
 
     if (imageRatio > frameRatio) {
-      sourceWidth = image.naturalHeight * frameRatio;
-      sourceX = (image.naturalWidth - sourceWidth) / 2;
+      drawWidth *= imageRatio / frameRatio;
     } else {
-      sourceHeight = image.naturalWidth / frameRatio;
-      sourceY = (image.naturalHeight - sourceHeight) / 2;
+      drawHeight *= frameRatio / imageRatio;
     }
 
+    // srcset density-corrects naturalWidth/Height. Draw the entire source and
+    // crop at the destination, matching centered object-fit: cover without
+    // treating those CSS dimensions as source-pixel coordinates.
     samplerContext.drawImage(
       image,
-      sourceX,
-      sourceY,
-      sourceWidth,
-      sourceHeight,
-      0,
-      0,
-      columns,
-      rows,
+      (columns - drawWidth) / 2,
+      (rows - drawHeight) / 2,
+      drawWidth,
+      drawHeight,
     );
 
     const pixels = samplerContext.getImageData(0, 0, columns, rows).data;

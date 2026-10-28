@@ -1523,7 +1523,7 @@ video {
 .about-copy .tag-list {
   gap: 14.2px;
   position: relative;
-  top: 6px;
+  top: calc(6px + var(--portrait-tag-offset, 0px));
 }
 
 .about-copy .tag-list span {

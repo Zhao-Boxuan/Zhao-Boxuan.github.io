@@ -14,19 +14,52 @@ export function About({ language }: { language: Language }) {
   useLayoutEffect(() => {
     const grid = gridRef.current;
     const portrait = grid?.querySelector<HTMLElement>('.portrait-card');
-    if (!grid || !portrait) return;
+    const tags = grid?.querySelector<HTMLElement>('.tag-list');
+    const contacts = grid?.querySelector<HTMLElement>('.contact-meta');
+    const lead = grid?.querySelector<HTMLElement>('.about-lead');
+    if (!grid || !portrait || !tags || !contacts || !lead) return;
+    let pendingFrame = 0;
 
-    // Match the visible top after the portrait's existing center-based scale.
+    // Ignore reveal-animation translations when measuring resting positions.
+    const revealOffset = (element: HTMLElement) => {
+      const transform = getComputedStyle(element).transform;
+      return transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m42;
+    };
     const alignCopy = () => {
       const scale = Number.parseFloat(getComputedStyle(portrait).getPropertyValue('--portrait-card-scale')) || 1;
       const height = Number.parseFloat(getComputedStyle(portrait).height);
       grid.style.setProperty('--portrait-top-inset', `${height * (1 - scale) / 2}px`);
+
+      let offset = 0;
+      if (window.matchMedia('(min-width: 701px)').matches) {
+        const tagRect = tags.getBoundingClientRect();
+        const currentOffset = Number.parseFloat(grid.style.getPropertyValue('--portrait-tag-offset')) || 0;
+        const naturalTop = tagRect.top - revealOffset(tags) - currentOffset;
+        const targetTop = portrait.getBoundingClientRect().bottom - tagRect.height;
+        const contactBottom = contacts.getBoundingClientRect().bottom - revealOffset(contacts);
+        const minimumGap = Number.parseFloat(getComputedStyle(tags).rowGap) || 14.2;
+        // Keep the existing flow when the unchanged labels cannot fit beneath
+        // the contacts. This also leaves the entire mobile layout untouched.
+        if (targetTop >= contactBottom + minimumGap) offset = targetTop - naturalTop;
+      }
+      grid.style.setProperty('--portrait-tag-offset', `${offset}px`);
+    };
+    const scheduleAlignment = () => {
+      window.cancelAnimationFrame(pendingFrame);
+      pendingFrame = window.requestAnimationFrame(alignCopy);
     };
     alignCopy();
-    const observer = new ResizeObserver(alignCopy);
-    observer.observe(portrait);
-    return () => observer.disconnect();
-  }, []);
+    const observer = new ResizeObserver(scheduleAlignment);
+    [portrait, tags, contacts, lead].forEach(element => observer.observe(element));
+    window.addEventListener('resize', scheduleAlignment);
+    document.fonts.addEventListener('loadingdone', scheduleAlignment);
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(pendingFrame);
+      window.removeEventListener('resize', scheduleAlignment);
+      document.fonts.removeEventListener('loadingdone', scheduleAlignment);
+    };
+  }, [language]);
 
   useLayoutEffect(() => {
     const list = experienceListRef.current;
