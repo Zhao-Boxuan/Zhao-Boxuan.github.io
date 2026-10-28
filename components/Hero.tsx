@@ -1,10 +1,12 @@
 import { profile } from '@/data/siteData';
 import type { Language } from '@/types/content';
 import { HeroReveal } from './HeroReveal';
+import { HERO_REVEAL_QUERY, HERO_REVEAL_SOURCE } from '@/lib/homeMedia';
 
 export function Hero({ language }: { language: Language }) {
   return (
     <section className="hero" id="top" data-motion="section">
+      <link rel="preload" as="image" href={HERO_REVEAL_SOURCE} media={HERO_REVEAL_QUERY} fetchPriority="high" />
       <div className="hero-media" aria-hidden="true">
         <div className="hero-wash" />
         <div className="hero-grid" />

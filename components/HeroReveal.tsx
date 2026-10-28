@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { readProjectReturnSlug } from '@/lib/projectReturn';
+import { HERO_REVEAL_QUERY, HERO_REVEAL_SOURCE } from '@/lib/homeMedia';
 
-const DESKTOP_QUERY = '(hover: hover) and (pointer: fine) and (min-width: 901px) and (prefers-reduced-motion: no-preference)';
 const FIELD_SIZE = 512;
 const ACTIVE_TAIL_MS = 2700;
 const MAX_SPLATS_PER_FRAME = 72;
@@ -216,20 +216,43 @@ const createProgram = (gl: WebGL2RenderingContext, fragmentSource: string) => {
   return program;
 };
 
-const uniform = (gl: WebGL2RenderingContext, program: WebGLProgram, name: string) =>
-  gl.getUniformLocation(program, name);
+const uniformLocations = new WeakMap<WebGLProgram, Map<string, WebGLUniformLocation | null>>();
+const uniform = (gl: WebGL2RenderingContext, program: WebGLProgram, name: string) => {
+  let locations = uniformLocations.get(program);
+  if (!locations) {
+    locations = new Map();
+    uniformLocations.set(program, locations);
+  }
+  if (!locations.has(name)) locations.set(name, gl.getUniformLocation(program, name));
+  return locations.get(name)!;
+};
 
 export function HeroReveal() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    if (readProjectReturnSlug()) return;
+    const query = window.matchMedia(HERO_REVEAL_QUERY);
+    const update = () => setEnabled(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled || readProjectReturnSlug()) return;
 
     const canvas = canvasRef.current;
     const hero = canvas?.closest<HTMLElement>('.hero');
     if (!canvas || !hero) return;
 
-    const mediaQuery = window.matchMedia(DESKTOP_QUERY);
+    const mediaQuery = window.matchMedia(HERO_REVEAL_QUERY);
+    // Start transfer before synchronous shader compilation. The HTML preload
+    // discovers the same URL even before this component hydrates.
+    const image = new Image();
+    image.decoding = 'async';
+    image.fetchPriority = 'high';
+    image.src = HERO_REVEAL_SOURCE;
     const gl = canvas.getContext('webgl2', {
       alpha: true,
       antialias: false,
@@ -288,7 +311,6 @@ export function HeroReveal() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([247, 247, 245, 0]));
 
-    const image = new Image();
     const splats: Splat[] = [];
     let animationFrame = 0;
     let activeUntil = 0;
@@ -483,9 +505,7 @@ export function HeroReveal() {
       }
     });
 
-    image.decoding = 'async';
     image.onload = () => {
-      imageReady = true;
       imageWidth = image.naturalWidth;
       imageHeight = image.naturalHeight;
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -493,8 +513,15 @@ export function HeroReveal() {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
       resize();
       clearField();
+      imageReady = true;
+      display(performance.now());
+      canvas.dataset.ready = 'true';
+      performance.mark('hero-reveal-ready');
+      // Replay input received while the texture was loading, even if the
+      // pointer has since stopped moving.
+      if (splats.length > 0) requestRender();
     };
-    image.src = '/images/hero/home-reveal-underlay-03.jpg';
+    image.onerror = () => { canvas.dataset.ready = 'error'; };
 
     resize();
     clearField();
@@ -512,6 +539,8 @@ export function HeroReveal() {
       hero.removeEventListener('pointerleave', handlePointerLeave);
       mediaQuery.removeEventListener('change', handleMediaChange);
       image.onload = null;
+      image.onerror = null;
+      delete canvas.dataset.ready;
       gl.deleteTexture(readTarget.texture);
       gl.deleteTexture(writeTarget.texture);
       gl.deleteFramebuffer(readTarget.framebuffer);
@@ -523,7 +552,7 @@ export function HeroReveal() {
       gl.deleteProgram(simulationProgram);
       gl.deleteProgram(displayProgram);
     };
-  }, []);
+  }, [enabled]);
 
   return <canvas aria-hidden="true" className="hero-reveal-canvas" ref={canvasRef} />;
 }

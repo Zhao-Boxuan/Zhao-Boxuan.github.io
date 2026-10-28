@@ -7,22 +7,22 @@ import type { Language } from '@/types/content';
 
 const overviewMedia = [
   { src: '/media/project-overview/optimized/01.webp', type: 'image', alt: 'Selected work 01', width: 1772, height: 960 },
-  { src: '/media/project-overview/02_2.mp4', type: 'video', alt: 'Selected work 02', width: 1920, height: 1080 },
+  { src: '/media/project-overview/02_2.mp4', poster: '/media/project-overview/posters/02_2.webp', type: 'video', alt: 'Selected work 02', width: 1920, height: 1080 },
   { src: '/media/project-overview/optimized/04_2.webp', type: 'image', alt: 'Selected work 04', width: 1692, height: 960 },
   { src: '/media/project-overview/optimized/17.webp', type: 'image', alt: 'Selected work 17', width: 2447, height: 960 },
   { src: '/media/project-overview/optimized/03.webp', type: 'image', alt: 'Selected work 03', width: 1440, height: 960 },
   { src: '/media/project-overview/optimized/05_3.webp', type: 'image', alt: 'Selected work 05', width: 1505, height: 960 },
   { src: '/media/project-overview/optimized/10.webp', type: 'image', alt: 'Selected work 10', width: 886, height: 960 },
   { src: '/media/project-overview/optimized/11.webp', type: 'image', alt: 'Selected work 11', width: 1770, height: 960 },
-  { src: '/media/project-overview/07.mp4', type: 'video', alt: 'Selected work 07', width: 1920, height: 1080 },
+  { src: '/media/project-overview/07.mp4', poster: '/media/project-overview/posters/07.webp', type: 'video', alt: 'Selected work 07', width: 1920, height: 1080 },
   { src: '/media/project-overview/optimized/06.webp', type: 'image', alt: 'Selected work 06', width: 1772, height: 960 },
   { src: '/media/project-overview/optimized/08_2.webp', type: 'image', alt: 'Selected work 08', width: 1770, height: 960 },
-  { src: '/media/project-overview/09.mp4', type: 'video', alt: 'Selected work 09', width: 1320, height: 720 },
+  { src: '/media/project-overview/09.mp4', poster: '/media/project-overview/posters/09.webp', type: 'video', alt: 'Selected work 09', width: 1320, height: 720 },
   { src: '/media/project-overview/optimized/16.webp', type: 'image', alt: 'Selected work 16', width: 1707, height: 960 },
   { src: '/media/project-overview/optimized/12.webp', type: 'image', alt: 'Selected work 12', width: 1440, height: 960 },
   { src: '/media/project-overview/optimized/13.webp', type: 'image', alt: 'Selected work 13', width: 1326, height: 960 },
   { src: '/media/project-overview/optimized/14_3.webp', type: 'image', alt: 'Selected work 14', width: 2006, height: 960 },
-  { src: '/media/project-overview/15_2.mp4', type: 'video', alt: 'Selected work 15', width: 2558, height: 1438 },
+  { src: '/media/project-overview/15_2.mp4', poster: '/media/project-overview/posters/15_2.webp', type: 'video', alt: 'Selected work 15', width: 2558, height: 1438 },
   { src: '/media/project-overview/optimized/18.webp', type: 'image', alt: 'Selected work 18', width: 1707, height: 960 },
 ] as const;
 
@@ -102,6 +102,8 @@ export function ProjectOverview({ language }: { language: Language }) {
     let pointer: { x: number; y: number } | null = null;
     let disposed = false;
     let ready = false;
+    let nearViewport = false;
+    let warmVideoIndex: number | null = null;
     let stageWidth = 0;
     let stageHeight = 0;
     let mobile = false;
@@ -120,18 +122,27 @@ export function ProjectOverview({ language }: { language: Language }) {
     const setCursorX = gsap.quickSetter(cursor, 'x', 'px');
     const setCursorY = gsap.quickSetter(cursor, 'y', 'px');
 
-    const ensureMedia = (index: number) => {
+    const ensureMedia = (index: number, priority: 'high' | 'low') => {
       const media = resolvedMedia[index];
-      if (!media || media.getAttribute('src')) return;
+      if (!media) return;
+      if (media instanceof HTMLVideoElement) {
+        if (!media.poster && media.dataset.poster) media.poster = media.dataset.poster;
+        return;
+      }
+      media.fetchPriority = priority;
+      if (media.getAttribute('src')) return;
       const source = media.dataset.src;
       if (!source) return;
+      // Visibility is controlled by this window. Native lazy-loading can defer
+      // an image inside the initially hidden figures forever while decode()
+      // waits for it before making those same figures visible.
+      media.loading = 'eager';
       media.setAttribute('src', source);
-      if (media instanceof HTMLVideoElement) media.load();
     };
 
     const ensureMediaWindow = (active: number) => {
       const offsets = mobile ? [-1, 0, 1, 2, 3] : [-2, -1, 0, 1, 2, 3, 4, 5, 6];
-      offsets.forEach((offset) => ensureMedia((active + offset + figures.length) % figures.length));
+      offsets.forEach((offset) => ensureMedia((active + offset + figures.length) % figures.length, offset === 0 ? 'high' : 'low'));
     };
 
     const relativeIndex = (index: number, active: number) => {
@@ -262,13 +273,31 @@ export function ProjectOverview({ language }: { language: Language }) {
 
     const syncPlayback = () => {
       const visible = ready && inView && !covered && !transitionActive && !document.hidden;
+      const canPrepare = ready && nearViewport && !covered && !transitionActive && !document.hidden && !reduceMotion;
       const shouldPause = interactionPauseSources.size > 0 || !visible;
       activeMove?.paused(shouldPause);
       hold?.paused(shouldPause);
+      // Keep posters for every visible strip, but only bind video data for
+      // current playback and one approaching clip. Never unload cached clips.
+      const nextVideo = videos
+        .map(({ index }) => ({ index, distance: (index - activeIndex + figures.length) % figures.length }))
+        .filter(({ index, distance }) => !playbackIndices.has(index) && distance > 0 && distance <= 3)
+        .sort((a, b) => a.distance - b.distance)[0];
+      // Hold the warm-up slot until that clip is playable; changing layout
+      // cannot start a succession of background video downloads.
+      if (warmVideoIndex !== null) {
+        const warm = resolvedMedia[warmVideoIndex] as HTMLVideoElement;
+        if (warm.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA || playbackIndices.has(warmVideoIndex) || warm.error) warmVideoIndex = null;
+      }
+      if (canPrepare && warmVideoIndex === null && nextVideo) warmVideoIndex = nextVideo.index;
       videos.forEach(({ media, index }) => {
         const shouldPlay = visible && !reduceMotion && playbackIndices.has(index);
-        if (shouldPlay && !playingVideos.has(media)) {
+        const shouldPrepare = canPrepare && (playbackIndices.has(index) || index === warmVideoIndex);
+        if (shouldPrepare) {
           media.preload = 'auto';
+          if (!media.getAttribute('src') && media.dataset.src) media.src = media.dataset.src;
+        } else if (media.preload !== 'none') media.preload = 'none';
+        if (shouldPlay && !playingVideos.has(media)) {
           playingVideos.add(media);
           void media.play().then(() => {
             if (disposed || !playingVideos.has(media)) media.pause();
@@ -655,10 +684,10 @@ export function ProjectOverview({ language }: { language: Language }) {
     };
 
     const preloadObserver = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      preloadObserver.disconnect();
-      void initializeWhenNearViewport();
-    }, { rootMargin: '75% 0px', threshold: 0.01 });
+      nearViewport = entry.isIntersecting;
+      if (nearViewport) void initializeWhenNearViewport();
+      syncPlayback();
+    }, { rootMargin: `${Math.round(window.innerHeight * 0.75)}px 0px`, threshold: 0.01 });
     preloadObserver.observe(marquee);
 
     return () => {
@@ -749,6 +778,7 @@ export function ProjectOverview({ language }: { language: Language }) {
                   aria-label={media.alt}
                   className="project-overview-image-source"
                   data-height={media.height}
+                  data-poster={media.poster}
                   data-src={media.src}
                   data-width={media.width}
                   loop

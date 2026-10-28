@@ -105,7 +105,7 @@ export function About({ language }: { language: Language }) {
                   />
                 ) : (
                   <span aria-hidden="true" className="experience-logo">
-                    <img src={item.logo} alt="" />
+                    <img src={item.logo} alt="" loading="lazy" decoding="async" />
                   </span>
                 )}
                 <div className="experience-organization">

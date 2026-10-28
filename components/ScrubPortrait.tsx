@@ -40,6 +40,9 @@ export function ScrubPortrait({ language }: { language: Language }) {
   const glitchBornRef = useRef(0);
   const glitchBandsRef = useRef<GlitchBand[]>([]);
   const interactedRef = useRef(false);
+  const pointerInputRef = useRef(false);
+  const visibleRef = useRef(true);
+  const decodedFrameRef = useRef<number | null>(null);
   const [videoSource, setVideoSource] = useState<string>();
   const [videoReady, setVideoReady] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -57,7 +60,7 @@ export function ScrubPortrait({ language }: { language: Language }) {
         setVideoSource(VIDEO_SOURCE);
         observer.disconnect();
       },
-      { rootMargin: '100% 0px' },
+      { rootMargin: `${Math.round(window.innerHeight)}px 0px` },
     );
 
     observer.observe(card);
@@ -75,7 +78,7 @@ export function ScrubPortrait({ language }: { language: Language }) {
     const canvas = glitchCanvasRef.current;
     const card = cardRef.current;
     const video = videoRef.current;
-    if (!canvas || !card || !video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+    if (!canvas || !card || !video || !visibleRef.current || document.hidden || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
 
     if (now - glitchTickRef.current < GLITCH_INTERVAL) {
       glitchFrameRef.current = window.requestAnimationFrame(drawGlitchFrame);
@@ -137,7 +140,7 @@ export function ScrubPortrait({ language }: { language: Language }) {
   };
 
   const requestGlitchFrame = () => {
-    if (!glitchFrameRef.current) glitchFrameRef.current = window.requestAnimationFrame(drawGlitchFrame);
+    if (visibleRef.current && !document.hidden && !glitchFrameRef.current) glitchFrameRef.current = window.requestAnimationFrame(drawGlitchFrame);
   };
 
   const requestDecodedGlitchFrame = () => {
@@ -147,7 +150,11 @@ export function ScrubPortrait({ language }: { language: Language }) {
       requestVideoFrameCallback?: (callback: () => void) => number;
     };
     if (videoWithFrameCallback.requestVideoFrameCallback) {
-      videoWithFrameCallback.requestVideoFrameCallback(() => requestGlitchFrame());
+      if (decodedFrameRef.current !== null) video.cancelVideoFrameCallback(decodedFrameRef.current);
+      decodedFrameRef.current = videoWithFrameCallback.requestVideoFrameCallback(() => {
+        decodedFrameRef.current = null;
+        requestGlitchFrame();
+      });
     } else {
       requestGlitchFrame();
     }
@@ -157,7 +164,9 @@ export function ScrubPortrait({ language }: { language: Language }) {
     scrubFrameRef.current = 0;
     const video = videoRef.current;
     const duration = durationRef.current;
-    if (!video || !Number.isFinite(duration) || duration <= 0) return;
+    if (!video || !visibleRef.current || document.hidden || !Number.isFinite(duration) || duration <= 0) return;
+    // Resume from seeked instead of polling a pending decode every frame.
+    if (seekPendingRef.current || video.seeking) return;
 
     const elapsed = scrubTickRef.current ? now - scrubTickRef.current : SCRUB_INTERVAL;
     if (elapsed < SCRUB_INTERVAL) {
@@ -182,16 +191,17 @@ export function ScrubPortrait({ language }: { language: Language }) {
     }
 
     if (
-      seekPendingRef.current
-      || Math.abs(targetProgressRef.current - progressRef.current) > 0.0005
-      || Math.abs(video.currentTime - targetProgressRef.current * duration) >= minimumSeekDistance
+      !seekPendingRef.current && (
+        Math.abs(targetProgressRef.current - progressRef.current) > 0.0005
+        || Math.abs(video.currentTime - targetProgressRef.current * duration) >= minimumSeekDistance
+      )
     ) {
       scrubFrameRef.current = window.requestAnimationFrame(scrubVideo);
     }
   };
 
   const requestScrub = () => {
-    if (!scrubFrameRef.current) scrubFrameRef.current = window.requestAnimationFrame(scrubVideo);
+    if (visibleRef.current && !document.hidden && !seekPendingRef.current && !scrubFrameRef.current) scrubFrameRef.current = window.requestAnimationFrame(scrubVideo);
   };
 
   const updatePixelGlitch = (pointerX: number, pointerY: number) => {
@@ -283,6 +293,7 @@ export function ScrubPortrait({ language }: { language: Language }) {
     const pointerX = Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width));
     const pointerY = Math.min(1, Math.max(0, (event.clientY - bounds.top) / Math.max(bounds.height, 1)));
     const pointerDelta = pointerX - targetProgressRef.current;
+    pointerInputRef.current = true;
     targetProgressRef.current = pointerX;
     requestScrub();
     triggerGlitch(pointerX, pointerY, pointerDelta, bounds);
@@ -291,22 +302,40 @@ export function ScrubPortrait({ language }: { language: Language }) {
   const initializeVideo = (video: HTMLVideoElement) => {
     if (!Number.isFinite(video.duration) || video.duration <= 0) return;
     durationRef.current = video.duration;
-    const initialTime = Math.min(video.duration, Math.max(0, DEFAULT_PROGRESS * video.duration));
-    progressRef.current = DEFAULT_PROGRESS;
-    targetProgressRef.current = DEFAULT_PROGRESS;
-    seekPendingRef.current = true;
-    video.currentTime = initialTime;
+    const initialProgress = pointerInputRef.current ? targetProgressRef.current : DEFAULT_PROGRESS;
+    const initialTime = Math.min(video.duration, Math.max(0, initialProgress * video.duration));
+    progressRef.current = initialProgress;
+    seekPendingRef.current = Math.abs(video.currentTime - initialTime) > 0.001;
+    if (seekPendingRef.current) video.currentTime = initialTime;
+    else if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) handleVideoSeeked();
   };
 
   const handleVideoSeeked = () => {
     seekPendingRef.current = false;
     setVideoReady(true);
+    if (!performance.getEntriesByName('portrait-frame-ready').length) performance.mark('portrait-frame-ready');
     requestDecodedGlitchFrame();
     requestScrub();
   };
 
   const { contextSafe } = useGSAP(() => {
     const video = videoRef.current;
+    const card = cardRef.current;
+    const updateActivity = () => {
+      if (visibleRef.current && !document.hidden) requestScrub();
+      else {
+        window.cancelAnimationFrame(scrubFrameRef.current);
+        window.cancelAnimationFrame(glitchFrameRef.current);
+        scrubFrameRef.current = 0;
+        glitchFrameRef.current = 0;
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      visibleRef.current = entry.isIntersecting;
+      updateActivity();
+    });
+    if (card) observer.observe(card);
+    document.addEventListener('visibilitychange', updateActivity);
     const handleMetadata = () => {
       if (video) initializeVideo(video);
     };
@@ -315,6 +344,9 @@ export function ScrubPortrait({ language }: { language: Language }) {
 
     return () => {
       video?.removeEventListener('loadedmetadata', handleMetadata);
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', updateActivity);
+      if (video && decodedFrameRef.current !== null) video.cancelVideoFrameCallback?.(decodedFrameRef.current);
       if (scrubFrameRef.current) window.cancelAnimationFrame(scrubFrameRef.current);
       if (glitchFrameRef.current) window.cancelAnimationFrame(glitchFrameRef.current);
     };
@@ -399,6 +431,9 @@ export function ScrubPortrait({ language }: { language: Language }) {
           className="portrait-video"
           controls={false}
           muted
+          onLoadedData={() => {
+            if (!seekPendingRef.current && !videoRef.current?.seeking) handleVideoSeeked();
+          }}
           onSeeked={handleVideoSeeked}
           playsInline
           poster="/images/profile/zbx-turntable-poster-3-5s.webp"

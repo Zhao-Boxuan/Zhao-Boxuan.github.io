@@ -15,13 +15,14 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const nearViewportRef = useRef(false);
   const [ready, setReady] = useState(false);
 
   const drawAscii = useCallback(() => {
     const frame = frameRef.current;
     const image = imageRef.current;
     const canvas = canvasRef.current;
-    if (!frame || !image || !canvas || !image.complete || !image.naturalWidth) return;
+    if (!nearViewportRef.current || !frame || !image || !canvas || !image.complete || !image.naturalWidth) return;
 
     const rect = frame.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
@@ -90,6 +91,7 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
     context.font = `350 ${Math.max(7.5, cellHeight * 1.125)}px ${REFERENCE_MONO_STACK}`;
     context.textAlign = 'left';
     context.textBaseline = 'middle';
+    const glyphWidths = new Map(Array.from(GLYPHS, (glyph) => [glyph, Math.max(context.measureText(glyph).width, 0.1)]));
 
     for (let row = 0; row < rows; row += 1) {
       for (let column = 0; column < columns; column += 1) {
@@ -102,7 +104,7 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
           : luminance <= darkGrayLimit
             ? '#666666'
             : '#b3b4b3';
-        const glyphWidth = Math.max(context.measureText(glyph).width, 0.1);
+        const glyphWidth = glyphWidths.get(glyph)!;
         context.save();
         context.translate(column * horizontalAdvance, row * cellHeight + cellHeight / 2);
         context.scale(horizontalAdvance / glyphWidth, 1);
@@ -115,6 +117,7 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
   }, []);
 
   const scheduleDraw = useCallback(() => {
+    if (!nearViewportRef.current) return;
     if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current);
     animationFrameRef.current = requestAnimationFrame(drawAscii);
   }, [drawAscii]);
@@ -123,16 +126,26 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
     const frame = frameRef.current;
     if (!frame) return undefined;
     const observer = new ResizeObserver(scheduleDraw);
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      nearViewportRef.current = entry.isIntersecting;
+      if (entry.isIntersecting) {
+        const image = imageRef.current;
+        if (image && !image.getAttribute('src')) image.src = src;
+        scheduleDraw();
+      }
+    }, { rootMargin: '600px 0px' });
     observer.observe(frame);
+    visibilityObserver.observe(frame);
     return () => {
       observer.disconnect();
+      visibilityObserver.disconnect();
       if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [scheduleDraw]);
+  }, [scheduleDraw, src]);
 
   return (
     <div className={`project-ascii-image ${ready ? 'is-ready' : ''}`} ref={frameRef}>
-      <img ref={imageRef} src={src} alt={alt} loading="lazy" onLoad={scheduleDraw} />
+      <img ref={imageRef} data-src={src} alt={alt} decoding="async" onLoad={scheduleDraw} />
       <canvas className="project-ascii-layer" ref={canvasRef} aria-hidden="true" />
     </div>
   );
