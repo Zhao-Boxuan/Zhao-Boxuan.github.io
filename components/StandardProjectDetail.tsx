@@ -120,7 +120,7 @@ const finalizedProjectCopy: Record<string, FinalizedProjectCopy> = {
 };
 
 const studentProjectTeams: Record<string, string> = {
-  'marine-windpath': 'Individual project',
+  'marine-windpath': 'Individual project (initial site design with Zhang Jiasheng)',
   'neon-harbor': 'Individual project',
   'super-plantation': 'Individual project',
   't-rollerrent': 'With Zhang Jiasheng',
