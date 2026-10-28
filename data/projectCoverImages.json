@@ -1,0 +1,100 @@
+{
+  "/images/projects/digi-tao/cover.jpg": {
+    "slug": "digi-tao",
+    "width": 4961,
+    "height": 2690,
+    "src": "/images/project-covers/digi-tao-1600.webp",
+    "srcSet": "/images/project-covers/digi-tao-1600.webp 1600w, /images/project-covers/digi-tao-2400.webp 2400w, /images/projects/digi-tao/cover.jpg 4961w"
+  },
+  "/images/projects/truth-incubator/hero-interface.webp": {
+    "slug": "truth-incubator",
+    "width": 2800,
+    "height": 1518,
+    "src": "/images/project-covers/truth-incubator-1600.webp",
+    "srcSet": "/images/project-covers/truth-incubator-1600.webp 1600w, /images/projects/truth-incubator/hero-interface.webp 2800w"
+  },
+  "/images/projects/penguin-island/cover.jpg": {
+    "slug": "penguin-island",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/penguin-island-1600.webp",
+    "srcSet": "/images/project-covers/penguin-island-1600.webp 1600w, /images/project-covers/penguin-island-2400.webp 2400w, /images/projects/penguin-island/cover.jpg 4961w"
+  },
+  "/images/projects/hejiang-museum/cover.jpg": {
+    "slug": "hejiang-museum",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/hejiang-museum-1600.webp",
+    "srcSet": "/images/project-covers/hejiang-museum-1600.webp 1600w, /images/project-covers/hejiang-museum-2400.webp 2400w, /images/projects/hejiang-museum/cover.jpg 4961w"
+  },
+  "/images/projects/my-museum/cover.jpg": {
+    "slug": "my-museum",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/my-museum-1600.webp",
+    "srcSet": "/images/project-covers/my-museum-1600.webp 1600w, /images/project-covers/my-museum-2400.webp 2400w, /images/projects/my-museum/cover.jpg 4961w"
+  },
+  "/images/projects/riyadh-expo-2030/cover.jpg": {
+    "slug": "riyadh-expo-2030",
+    "width": 4669,
+    "height": 1443,
+    "src": "/images/project-covers/riyadh-expo-2030-1600.webp",
+    "srcSet": "/images/project-covers/riyadh-expo-2030-1600.webp 1600w, /images/project-covers/riyadh-expo-2030-2400.webp 2400w, /images/projects/riyadh-expo-2030/cover.jpg 4669w"
+  },
+  "/images/projects/bailian-booth/cover.jpg": {
+    "slug": "bailian-booth",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/bailian-booth-1600.webp",
+    "srcSet": "/images/project-covers/bailian-booth-1600.webp 1600w, /images/project-covers/bailian-booth-2400.webp 2400w, /images/projects/bailian-booth/cover.jpg 4961w"
+  },
+  "/images/projects/attention-economics/cover.jpg": {
+    "slug": "attention-economics",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/attention-economics-1600.webp",
+    "srcSet": "/images/project-covers/attention-economics-1600.webp 1600w, /images/project-covers/attention-economics-2400.webp 2400w, /images/projects/attention-economics/cover.jpg 4961w"
+  },
+  "/images/projects/marine-windpath/cover.jpg": {
+    "slug": "marine-windpath",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/marine-windpath-1600.webp",
+    "srcSet": "/images/project-covers/marine-windpath-1600.webp 1600w, /images/project-covers/marine-windpath-2400.webp 2400w, /images/projects/marine-windpath/cover.jpg 4961w"
+  },
+  "/images/projects/t-rollerrent/cover.jpg": {
+    "slug": "t-rollerrent",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/t-rollerrent-1600.webp",
+    "srcSet": "/images/project-covers/t-rollerrent-1600.webp 1600w, /images/project-covers/t-rollerrent-2400.webp 2400w, /images/projects/t-rollerrent/cover.jpg 4961w"
+  },
+  "/images/projects/fudi-gymnasium/cover.jpg": {
+    "slug": "fudi-gymnasium",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/fudi-gymnasium-1600.webp",
+    "srcSet": "/images/project-covers/fudi-gymnasium-1600.webp 1600w, /images/project-covers/fudi-gymnasium-2400.webp 2400w, /images/projects/fudi-gymnasium/cover.jpg 4961w"
+  },
+  "/images/projects/super-plantation/cover.jpg": {
+    "slug": "super-plantation",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/super-plantation-1600.webp",
+    "srcSet": "/images/project-covers/super-plantation-1600.webp 1600w, /images/project-covers/super-plantation-2400.webp 2400w, /images/projects/super-plantation/cover.jpg 4961w"
+  },
+  "/images/projects/village/cover.jpg": {
+    "slug": "village",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/village-1600.webp",
+    "srcSet": "/images/project-covers/village-1600.webp 1600w, /images/project-covers/village-2400.webp 2400w, /images/projects/village/cover.jpg 4961w"
+  },
+  "/images/projects/neon-harbor/cover.jpg": {
+    "slug": "neon-harbor",
+    "width": 4961,
+    "height": 2687,
+    "src": "/images/project-covers/neon-harbor-1600.webp",
+    "srcSet": "/images/project-covers/neon-harbor-1600.webp 1600w, /images/project-covers/neon-harbor-2400.webp 2400w, /images/projects/neon-harbor/cover.jpg 4961w"
+  }
+}

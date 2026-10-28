@@ -15,6 +15,7 @@ import {
 } from '@/lib/projectReturn';
 import type { Language } from '@/types/content';
 import { AsciiProjectImage } from './AsciiProjectImage';
+import { prepareProjectCover, rememberProjectCover, waitForImage } from '@/lib/projectImages';
 import { GOOEY_TEXT_REVEAL_EVENT, GooeyTextReveal } from './GooeyTextReveal';
 import { ProjectOverview } from './ProjectOverview';
 import { ProjectTransitionLink } from './ProjectTransition';
@@ -213,6 +214,21 @@ export function Projects({ language }: { language: Language }) {
             }
           });
 
+          const coverLabels = Object.entries(timeline.labels)
+            .filter(([label]) => label.startsWith('project-'))
+            .map(([label, time]) => ({ slug: label.slice('project-'.length), time }))
+            .sort((a, b) => a.time - b.time);
+          const prepareTimelineCovers = (self: ScrollTrigger) => {
+            if (self.scroll() < self.start - window.innerHeight) return;
+            if (document.documentElement.classList.contains('project-transition-active')) return;
+            const time = timeline.time();
+            const ahead = window.innerHeight * 3;
+            // The clipped panels cannot provide an IntersectionObserver
+            // lookahead. Use the same labels that locate the project covers.
+            coverLabels.filter(item => item.time >= time - window.innerHeight && item.time <= time + ahead)
+              .slice(0, 4).forEach(item => prepareProjectCover(item.slug, item.time <= time + window.innerHeight * 0.7 ? 'high' : 'low'));
+          };
+
           let galleryTop = 0;
           let galleryCovered = false;
           let cat04OrbitActive = false;
@@ -338,10 +354,12 @@ export function Projects({ language }: { language: Language }) {
               syncBackgroundLock(self);
               syncGalleryCoverage();
               syncCat04Orbit();
+              prepareTimelineCovers(self);
             },
-            onUpdate: () => {
+            onUpdate: (self) => {
               syncGalleryCoverage();
               syncCat04Orbit();
+              prepareTimelineCovers(self);
             },
             onEnter: () => {
               enterBackgroundLock();
@@ -398,6 +416,9 @@ export function Projects({ language }: { language: Language }) {
       return;
     }
     const savedPosition = readProjectIndexPosition(returnProjectSlug);
+    const returnController = new AbortController();
+    const criticalImage = prepareProjectCover(returnProjectSlug, 'high');
+    const coverReady = waitForImage(criticalImage, returnController.signal);
 
     let cancelled = false;
     let retryTimer = 0;
@@ -413,7 +434,21 @@ export function Projects({ language }: { language: Language }) {
 
       firstRevealFrame = window.requestAnimationFrame(() => {
         restore();
-        secondRevealFrame = window.requestAnimationFrame(revealProjectReturn);
+        secondRevealFrame = window.requestAnimationFrame(() => {
+          void coverReady.then(() => {
+            if (cancelled) return;
+            // On a fresh document, other pinned sections may finish mounting
+            // after our first layout effect. Recalculate their spacing before
+            // revealing the cover instead of correcting it visibly afterwards.
+            ScrollTrigger.refresh();
+            restore();
+            firstRevealFrame = window.requestAnimationFrame(() => {
+              if (cancelled) return;
+              restore();
+              finishProjectReturn();
+            });
+          });
+        });
       });
     };
 
@@ -426,17 +461,17 @@ export function Projects({ language }: { language: Language }) {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       let didRestore = false;
 
-      if (savedPosition !== null) {
-        window.scrollTo({ behavior: 'auto', top: savedPosition });
-        ScrollTrigger.update();
-        didRestore = true;
-      } else if (!reduceMotion && timeline && trigger && labelTime !== undefined) {
+      if (!reduceMotion && timeline && trigger && labelTime !== undefined) {
         const progress = gsap.utils.clamp(0, 1, labelTime / Math.max(1, timeline.duration()));
         const destination = trigger.start + (trigger.end - trigger.start) * progress + 1;
         timeline.progress(progress, true);
         window.scrollTo({ behavior: 'auto', top: destination });
         ScrollTrigger.update();
         timeline.progress(progress, true);
+        didRestore = true;
+      } else if (savedPosition !== null) {
+        window.scrollTo({ behavior: 'auto', top: savedPosition });
+        ScrollTrigger.update();
         didRestore = true;
       } else if (reduceMotion) {
         const projectCard = document.getElementById(`project-${returnProjectSlug}`);
@@ -461,17 +496,17 @@ export function Projects({ language }: { language: Language }) {
       window.setTimeout(restorePosition, 620),
       window.setTimeout(() => {
         restorePosition();
-        finishProjectReturn();
       }, 1250),
     );
 
     return () => {
       cancelled = true;
+      returnController.abort();
       window.clearTimeout(retryTimer);
       window.cancelAnimationFrame(firstRevealFrame);
       window.cancelAnimationFrame(secondRevealFrame);
       settleTimers.forEach((timer) => window.clearTimeout(timer));
-      if (restored) finishProjectReturn();
+      finishProjectReturn();
     };
   }, [language]);
 
@@ -502,6 +537,9 @@ export function Projects({ language }: { language: Language }) {
   }, [showUpdateNotice]);
 
   const openCategory = (categoryNumber: string) => {
+    const panel = sequenceRef.current?.querySelector<HTMLElement>(`[data-category-number="${categoryNumber}"]`);
+    Array.from(panel?.querySelectorAll<HTMLElement>('.project-card[data-project-slug]') ?? [])
+      .slice(0, 2).forEach(card => prepareProjectCover(card.dataset.projectSlug!, 'high'));
     const timeline = timelineRef.current;
     const trigger = scrollTriggerRef.current;
     const labelTime = timeline?.labels[`cat-${categoryNumber}`];
@@ -522,6 +560,8 @@ export function Projects({ language }: { language: Language }) {
   };
 
   const rememberIndexedProjectPosition = (projectSlug: string) => {
+    const image = prepareProjectCover(projectSlug, 'high');
+    if (image) rememberProjectCover(projectSlug, image);
     const timeline = timelineRef.current;
     const trigger = scrollTriggerRef.current;
     const labelTime = timeline?.labels[`project-${projectSlug}`];

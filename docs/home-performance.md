@@ -45,11 +45,57 @@ Gallery posters were extracted from frame zero, proportionally resized to
 
 ## Existing limitations
 
-- Next.js segment-prefetch requests can return 404 for flattened URLs while
-  export stores the segments in nested directories. The old export has the
-  same layout. Tested navigation completed through the existing fallback.
-  Routing and deployment configuration were not changed here.
+- Windows local exports store some segment files in nested directories. This
+  produced local-test 404s. The Linux GitHub Pages deployment serves the flat
+  segment URLs with HTTP 200; the later online audit did not reproduce those
+  route-data 404s. Do not use the local artifact layout to diagnose production.
 - Focused lint reported the same 23 existing React compiler diagnostics in
   ScrubPortrait before and after, concerning GSAP contextSafe callbacks.
   TypeScript and production export passed.
 - No video re-encoding, CDN migration, WebGL precision or layout changes.
+
+## Follow-up: clipped covers and navigation
+
+The custom 600px image observer was clipped by the CAT panel ancestors. A
+cover could be exposed on screen before its URL was bound. The fix adds a
+bounded lookahead driven by the existing ScrollTrigger project labels, as well
+as preparation on category selection and explicit preparation on index return.
+
+Responsive WebP covers are generated at 1600px and 2400px, with the original
+file retained as the largest candidate. The 1600px set totals 4.46 MiB versus
+37.36 MiB for originals; all generated variants add about 13.05 MiB. A smaller
+960px experiment was discarded. Display-size SSIM for retained 1600px images
+was 0.983–0.997, supplemented by visual comparisons. Video files are unchanged.
+
+Navigation now starts after the white overlay reaches opacity one (0.25s),
+overlapping the existing two-second minimum visual sequence. Readiness waits
+for actual destination media and restored position rather than every font.
+Navigation cancellation clears stale return state. A native-link query fallback
+preserves the return target when clicking before hydration, then removes the
+temporary query after restoration. Fresh-document pin spacing is recalculated
+before revealing the restored cover.
+
+Viewport-wide Link prefetch is replaced by a short pointer-intent/focus prefetch.
+Detail video sources and posters are prepared only near the viewport. Gallery
+cards are revealed independently of the first image; current visible resources
+receive normal/high priority, and unchanged video metadata no longer restarts
+the animation layout.
+
+### Follow-up validation
+
+- Production static export: all 16 routes pass. Changed-file ESLint has zero
+  errors (two existing unoptimized-image advisories); TypeScript passes.
+- Edge 156 against the export at 1440×900, simulated 1 MiB/s and 40ms latency:
+  navigation requests started about 245–273ms after click. Three tested detail
+  entries completed in about 2.0–2.13s. These are controlled local observations,
+  not public-network timing guarantees.
+- Three detail entries, detail reloads, native/client index returns, clean
+  browser back/forward and cancellation during a delayed navigation pass.
+  Target images were decoded and in view before reveal.
+- Delaying the target cover by five seconds kept the reveal pending until its
+  actual decode. Delaying unrelated fonts by eight seconds did not gate reveal.
+- Gallery cards appeared while their deliberately delayed primary image was
+  still pending; hover did not stop automatic scrolling. Four CAT preparation
+  windows and mobile preparation passed. No uncaught JavaScript errors.
+- Local Windows test serving maps nested segment files to the flat URLs used
+  by the Linux deployment; this is test infrastructure, not a deployed rewrite.

@@ -1,5 +1,6 @@
 export const PROJECT_RETURN_STORAGE_KEY = 'portfolio:return-project';
 export const PROJECT_RETURN_PENDING_CLASS = 'project-return-pending';
+export const PROJECT_RETURN_READY_EVENT = 'project-return-ready';
 const PROJECT_POSITION_STORAGE_PREFIX = 'portfolio:project-position:';
 const PROJECT_INDEX_HISTORY_KEY = 'portfolio:index-history-project';
 
@@ -28,6 +29,7 @@ export function beginProjectReturn(slug: string) {
 export function revealProjectReturn() {
   if (typeof window === 'undefined') return;
   window.document.documentElement.classList.remove(PROJECT_RETURN_PENDING_CLASS);
+  window.dispatchEvent(new Event(PROJECT_RETURN_READY_EVENT));
 }
 
 export function clearProjectReturnSlug() {
@@ -65,4 +67,11 @@ export function readProjectIndexPosition(slug: string) {
 export function finishProjectReturn() {
   clearProjectReturnSlug();
   revealProjectReturn();
+  if (typeof window !== 'undefined' && window.location.pathname === '/') {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('return')) {
+      url.searchParams.delete('return');
+      window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+  }
 }

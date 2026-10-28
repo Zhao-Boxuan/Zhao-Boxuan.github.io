@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { CustomCursor } from '@/components/CustomCursor';
 import { ProjectTransitionProvider } from '@/components/ProjectTransition';
-import { unavailableProjectSlugs } from '@/data/projects';
+import { projects, unavailableProjectSlugs } from '@/data/projects';
 import { PROJECT_RETURN_PENDING_CLASS, PROJECT_RETURN_STORAGE_KEY } from '@/lib/projectReturn';
 import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/manrope/500.css';
@@ -17,7 +17,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const projectReturnBootScript = `
     try {
       const unavailableSlug = new URLSearchParams(window.location.search).get('unavailable');
+      const returningSlug = new URLSearchParams(window.location.search).get('return');
+      const projectSlugs = ${JSON.stringify(projects.map(project => project.slug))};
       const unavailableProjects = ${JSON.stringify(unavailableProjectSlugs)};
+      if (window.location.pathname === '/' && projectSlugs.includes(returningSlug)) {
+        window.sessionStorage.setItem('${PROJECT_RETURN_STORAGE_KEY}', returningSlug);
+      }
       if (window.location.pathname === '/' && unavailableProjects.includes(unavailableSlug)) {
         window.sessionStorage.setItem('${PROJECT_RETURN_STORAGE_KEY}', unavailableSlug);
       }

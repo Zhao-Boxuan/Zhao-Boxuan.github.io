@@ -102,6 +102,8 @@ export function ProjectOverview({ language }: { language: Language }) {
     let pointer: { x: number; y: number } | null = null;
     let disposed = false;
     let ready = false;
+    let cycleReady = false;
+    let layoutTargetIndex = 0;
     let nearViewport = false;
     let warmVideoIndex: number | null = null;
     let stageWidth = 0;
@@ -119,14 +121,24 @@ export function ProjectOverview({ language }: { language: Language }) {
     ));
     const playingVideos = new Set<HTMLVideoElement>();
     let playbackIndices = new Set<number>();
+    const posterImages = new Map<number, HTMLImageElement>();
     const setCursorX = gsap.quickSetter(cursor, 'x', 'px');
     const setCursorY = gsap.quickSetter(cursor, 'y', 'px');
 
-    const ensureMedia = (index: number, priority: 'high' | 'low') => {
+    const ensureMedia = (index: number, priority: 'high' | 'auto' | 'low') => {
       const media = resolvedMedia[index];
       if (!media) return;
       if (media instanceof HTMLVideoElement) {
-        if (!media.poster && media.dataset.poster) media.poster = media.dataset.poster;
+        if (media.dataset.poster) {
+          let poster = posterImages.get(index);
+          if (!poster) {
+            poster = new Image();
+            posterImages.set(index, poster);
+            poster.fetchPriority = priority;
+            poster.src = media.dataset.poster;
+            media.poster = media.dataset.poster;
+          } else poster.fetchPriority = priority;
+        }
         return;
       }
       media.fetchPriority = priority;
@@ -142,7 +154,12 @@ export function ProjectOverview({ language }: { language: Language }) {
 
     const ensureMediaWindow = (active: number) => {
       const offsets = mobile ? [-1, 0, 1, 2, 3] : [-2, -1, 0, 1, 2, 3, 4, 5, 6];
-      offsets.forEach((offset) => ensureMedia((active + offset + figures.length) % figures.length, offset === 0 ? 'high' : 'low'));
+      const states = layoutFor(active);
+      offsets.forEach(offset => {
+        const index = (active + offset + figures.length) % figures.length;
+        const state = states[index];
+        ensureMedia(index, state.alpha ? (state.fraction >= 0.3 ? 'high' : 'auto') : 'low');
+      });
     };
 
     const relativeIndex = (index: number, active: number) => {
@@ -274,13 +291,13 @@ export function ProjectOverview({ language }: { language: Language }) {
     const syncPlayback = () => {
       const visible = ready && inView && !covered && !transitionActive && !document.hidden;
       const canPrepare = ready && nearViewport && !covered && !transitionActive && !document.hidden && !reduceMotion;
-      const shouldPause = interactionPauseSources.size > 0 || !visible;
+      const shouldPause = interactionPauseSources.size > 0 || !visible || !cycleReady;
       activeMove?.paused(shouldPause);
       hold?.paused(shouldPause);
       // Keep posters for every visible strip, but only bind video data for
       // current playback and one approaching clip. Never unload cached clips.
       const nextVideo = videos
-        .map(({ index }) => ({ index, distance: (index - activeIndex + figures.length) % figures.length }))
+        .map(({ index }) => ({ index, distance: (index - layoutTargetIndex + figures.length) % figures.length }))
         .filter(({ index, distance }) => !playbackIndices.has(index) && distance > 0 && distance <= 3)
         .sort((a, b) => a.distance - b.distance)[0];
       // Hold the warm-up slot until that clip is playable; changing layout
@@ -331,6 +348,7 @@ export function ProjectOverview({ language }: { language: Language }) {
     };
 
     const applyLayout = (active: number, animate: boolean) => {
+      layoutTargetIndex = active;
       ensureMediaWindow(active);
       const states = layoutFor(active);
 
@@ -610,11 +628,13 @@ export function ProjectOverview({ language }: { language: Language }) {
     const transitionStateChanged = (event: Event) => {
       transitionActive = (event as CustomEvent<boolean>).detail;
       if (transitionActive) leaveCursor();
+      else if (nearViewport && !covered) void initializeWhenNearViewport();
       syncPlayback();
     };
     const coverageChanged = (event: Event) => {
       covered = (event as CustomEvent<boolean>).detail;
       if (covered) leaveCursor();
+      else if (nearViewport && !transitionActive) void initializeWhenNearViewport();
       syncPlayback();
     };
 
@@ -666,26 +686,32 @@ export function ProjectOverview({ language }: { language: Language }) {
         mediaWaitCleanups.push(finish);
       });
     };
-    // If metadata arrives after the bounded startup wait, correct the aspect ratio once.
-    videos.forEach(({ media }) => media.addEventListener('loadedmetadata', refreshLayout));
+    const metadataChanged = (event: Event) => {
+      const media = event.currentTarget as HTMLVideoElement;
+      const expected = Number(media.dataset.width) / Number(media.dataset.height);
+      const actual = media.videoWidth / media.videoHeight;
+      if (Number.isFinite(actual) && Math.abs(actual / expected - 1) > 0.001) refreshLayout();
+    };
+    videos.forEach(({ media }) => media.addEventListener('loadedmetadata', metadataChanged));
 
     let initialized = false;
     const initializeWhenNearViewport = async () => {
-      if (initialized) return;
+      if (initialized || covered || transitionActive) return;
       initialized = true;
       measureLayout();
-      ensureMediaWindow(activeIndex);
+      ready = true;
+      // Reveal each available image/poster immediately. Only the first cycle
+      // waits for its primary image; it no longer hides every other card.
+      applyLayout(activeIndex, false);
       await waitForMedia(resolvedMedia[activeIndex]);
       if (disposed) return;
-      ready = true;
-      measureLayout();
-      applyLayout(activeIndex, false);
+      cycleReady = true;
       if (!reduceMotion) queueNext();
     };
 
     const preloadObserver = new IntersectionObserver(([entry]) => {
       nearViewport = entry.isIntersecting;
-      if (nearViewport) void initializeWhenNearViewport();
+      if (nearViewport && !covered && !transitionActive) void initializeWhenNearViewport();
       syncPlayback();
     }, { rootMargin: `${Math.round(window.innerHeight * 0.75)}px 0px`, threshold: 0.01 });
     preloadObserver.observe(marquee);
@@ -721,7 +747,7 @@ export function ProjectOverview({ language }: { language: Language }) {
       playingVideos.clear();
       videos.forEach(({ media }) => {
         media.pause();
-        media.removeEventListener('loadedmetadata', refreshLayout);
+        media.removeEventListener('loadedmetadata', metadataChanged);
       });
       gsap.set([...figures, ...resolvedMedia], { clearProps: 'transform,opacity,visibility,width' });
       document.body.classList.remove('project-overview-image-cursor-active');

@@ -1,11 +1,12 @@
 'use client';
 
-import type { ComponentProps, MouseEvent, ReactNode } from 'react';
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef } from 'react';
+import type { ComponentProps, FocusEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
-import { beginProjectReturn, readProjectReturnSlug } from '@/lib/projectReturn';
+import { beginProjectReturn, finishProjectReturn, PROJECT_RETURN_READY_EVENT, readProjectReturnSlug } from '@/lib/projectReturn';
+import { prepareProjectCover, waitForImage, warmStoredProjectCover } from '@/lib/projectImages';
 
 type NavigationAction = 'push' | 'back';
 
@@ -13,10 +14,12 @@ interface TransitionOptions {
   action?: NavigationAction;
   beforeNavigate?: () => void;
   scroll?: boolean;
+  returnProjectSlug?: string;
 }
 
 interface ProjectTransitionContextValue {
   transitionTo: (href: string, options?: TransitionOptions) => void;
+  prefetch: (href: string) => void;
 }
 
 const ProjectTransitionContext = createContext<ProjectTransitionContextValue | null>(null);
@@ -71,6 +74,15 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
   const lastPercentageRef = useRef(-1);
   const completeTransitionRef = useRef<() => void>(() => undefined);
   const tryCompleteRef = useRef<() => void>(() => undefined);
+  const returnSlugRef = useRef<string | null>(null);
+  const readinessRef = useRef<AbortController | null>(null);
+  const prefetchedRef = useRef(new Set<string>());
+
+  const prefetch = useCallback((href: string) => {
+    if (activeRef.current || prefetchedRef.current.has(href)) return;
+    prefetchedRef.current.add(href);
+    router.prefetch(href);
+  }, [router]);
 
   const setPercentage = useCallback(() => {
     const percentage = percentageRef.current;
@@ -83,6 +95,10 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
   }, []);
 
   const waitForDestination = useCallback(async (destinationPath: string, sequence: number) => {
+    readinessRef.current?.abort();
+    const controller = new AbortController();
+    readinessRef.current = controller;
+    const returnSlug = destinationPath === '/' ? returnSlugRef.current : null;
     const nextFrame = () => new Promise<void>((resolve) => {
       window.requestAnimationFrame(() => resolve());
     });
@@ -90,32 +106,35 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
     await nextFrame();
     await nextFrame();
 
-    while (
-      sequence === transitionSequenceRef.current
-      && destinationPath === '/'
-      && document.documentElement.classList.contains('project-return-pending')
-    ) {
-      await new Promise<void>((resolve) => window.setTimeout(resolve, 24));
+    if (destinationPath === '/' && document.documentElement.classList.contains('project-return-pending')) {
+      await new Promise<void>(resolve => {
+        const finish = () => {
+          window.removeEventListener(PROJECT_RETURN_READY_EVENT, finish);
+          controller.signal.removeEventListener('abort', finish);
+          resolve();
+        };
+        window.addEventListener(PROJECT_RETURN_READY_EVENT, finish, { once: true });
+        controller.signal.addEventListener('abort', finish, { once: true });
+        if (controller.signal.aborted || !document.documentElement.classList.contains('project-return-pending')) finish();
+      });
     }
 
-    if (sequence !== transitionSequenceRef.current) return;
+    if (controller.signal.aborted || sequence !== transitionSequenceRef.current) return;
 
-    const returnSlug = destinationPath === '/' ? readProjectReturnSlug() : null;
     const criticalImage = destinationPath === '/'
-      ? document.querySelector<HTMLImageElement>(`#project-${returnSlug ?? ''} img`)
+      ? (returnSlug ? prepareProjectCover(returnSlug, 'high') : null)
       : document.querySelector<HTMLImageElement>('main img');
-    const imageReady = criticalImage && !criticalImage.complete
-      ? Promise.race([
-          criticalImage.decode().catch(() => undefined),
-          new Promise<void>((resolve) => window.setTimeout(resolve, 4000)),
-        ])
-      : Promise.resolve();
-    const fontsReady = document.fonts?.ready ?? Promise.resolve();
-
-    await Promise.allSettled([imageReady, fontsReady]);
-    if (sequence !== transitionSequenceRef.current) return;
+    // Only above-fold destination media gates the reveal. Unrelated fonts and
+    // below-fold assets must not hold an otherwise usable page behind white.
+    const bounds = criticalImage?.getBoundingClientRect();
+    if (criticalImage && (returnSlug || (bounds && bounds.top < window.innerHeight && bounds.bottom > 0))) {
+      criticalImage.fetchPriority = 'high';
+      await waitForImage(criticalImage, controller.signal);
+    }
+    if (controller.signal.aborted || sequence !== transitionSequenceRef.current) return;
 
     routeReadyRef.current = true;
+    performance.mark('project-transition-route-ready');
     tryCompleteRef.current();
   }, []);
 
@@ -131,7 +150,10 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
 
     const destinationPath = getPathname(href);
     const sequence = transitionSequenceRef.current + 1;
+    readinessRef.current?.abort();
     transitionSequenceRef.current = sequence;
+    returnSlugRef.current = destinationPath === '/' ? (options.returnProjectSlug ?? readProjectReturnSlug()) : null;
+    if (returnSlugRef.current) warmStoredProjectCover(returnSlugRef.current);
     expectedPathRef.current = destinationPath;
     activeRef.current = true;
     completingRef.current = false;
@@ -162,7 +184,7 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
 
     const navigate = () => {
       if (navigationAlreadyOccurred) {
-        void waitForDestination(destinationPath, sequence);
+        if (currentPathRef.current === destinationPath) void waitForDestination(destinationPath, sequence);
         return;
       }
 
@@ -178,7 +200,7 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
     if (reduceMotion) {
       gsap.set(overlay, { autoAlpha: 1 });
       gsap.set([solidReveal, dashedReveal], { attr: { 'stroke-dashoffset': 0 } });
-      progressRef.current.value = 100;
+      progressRef.current.value = 0;
       setPercentage();
       minimumReachedRef.current = true;
       navigate();
@@ -187,6 +209,7 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
 
     timelineRef.current = gsap.timeline()
       .to(overlay, { autoAlpha: 1, duration: 0.25, ease: 'power1.out' }, 0)
+      .call(navigate, undefined, 0.25)
       .to(solidReveal, {
         attr: { 'stroke-dashoffset': 0 },
         duration: 0.8,
@@ -205,7 +228,6 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
       }, 0)
       .call(() => {
         minimumReachedRef.current = true;
-        navigate();
         tryCompleteRef.current();
       }, undefined, 1.5);
   }, [router, setPercentage, waitForDestination]);
@@ -213,11 +235,13 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
   useLayoutEffect(() => {
     const normalizedPathname = normalizePathname(pathname);
     currentPathRef.current = normalizedPathname;
+    if (normalizedPathname !== '/') finishProjectReturn();
     if (!activeRef.current || normalizedPathname !== expectedPathRef.current) return;
     void waitForDestination(normalizedPathname, transitionSequenceRef.current);
   }, [pathname, waitForDestination]);
 
   useEffect(() => {
+    if (overlayRef.current) overlayRef.current.dataset.hydrated = 'true';
     completeTransitionRef.current = () => {
       const overlay = overlayRef.current;
       const solidReveal = solidRevealRef.current;
@@ -239,6 +263,7 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
           activeRef.current = false;
           completingRef.current = false;
           expectedPathRef.current = null;
+          returnSlugRef.current = null;
         },
       })
         .to([solidReveal, dashedReveal], {
@@ -277,13 +302,20 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
       ) return;
 
       if (activeRef.current) {
+        readinessRef.current?.abort();
+        transitionSequenceRef.current += 1;
+        routeReadyRef.current = false;
         expectedPathRef.current = destinationPath;
+        const slug = destinationPath === '/' ? projectSlugFromPath(previousPath) : null;
+        returnSlugRef.current = slug;
+        if (slug) beginProjectReturn(slug);
+        else finishProjectReturn();
         return;
       }
 
       const returningSlug = destinationPath === '/' ? projectSlugFromPath(previousPath) : null;
       if (returningSlug) beginProjectReturn(returningSlug);
-      startTransition(destinationPath, {}, true);
+      startTransition(destinationPath, { returnProjectSlug: returningSlug ?? undefined }, true);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -292,17 +324,21 @@ export function ProjectTransitionProvider({ children }: { children: ReactNode })
 
   useEffect(() => () => {
     transitionSequenceRef.current += 1;
+    readinessRef.current?.abort();
     timelineRef.current?.kill();
     document.documentElement.classList.remove('project-transition-active');
+    // A history traversal may replace the document after a detail refresh.
+    // Keep the return intent for the destination boot script in that case.
+    if (expectedPathRef.current !== '/') finishProjectReturn();
   }, []);
 
-  const contextValue = useRef<ProjectTransitionContextValue>({
+  const contextValue = useMemo<ProjectTransitionContextValue>(() => ({
     transitionTo: (href, options) => startTransition(href, options),
-  });
-  contextValue.current.transitionTo = (href, options) => startTransition(href, options);
+    prefetch,
+  }), [startTransition, prefetch]);
 
   return (
-    <ProjectTransitionContext.Provider value={contextValue.current}>
+    <ProjectTransitionContext.Provider value={contextValue}>
       {children}
       <div
         aria-label="Loading project"
@@ -370,8 +406,10 @@ interface ProjectTransitionLinkProps extends Omit<ComponentProps<typeof Link>, '
   href: string;
 }
 
-export function ProjectTransitionLink({ href, onClick, scroll, ...props }: ProjectTransitionLinkProps) {
-  const { transitionTo } = useProjectTransition();
+export function ProjectTransitionLink({ href, onClick, onPointerEnter, onPointerLeave, onFocus, scroll, ...props }: ProjectTransitionLinkProps) {
+  const { transitionTo, prefetch } = useProjectTransition();
+  const intentTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(intentTimer.current), []);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event);
@@ -388,5 +426,13 @@ export function ProjectTransitionLink({ href, onClick, scroll, ...props }: Proje
     transitionTo(href, { scroll });
   };
 
-  return <Link {...props} href={href} onClick={handleClick} scroll={scroll} />;
+  return <Link {...props} prefetch={false} href={href} onClick={handleClick} scroll={scroll}
+    onPointerEnter={(event: PointerEvent<HTMLAnchorElement>) => {
+      onPointerEnter?.(event);
+      clearTimeout(intentTimer.current);
+      intentTimer.current = setTimeout(() => prefetch(href), 120);
+    }}
+    onPointerLeave={(event: PointerEvent<HTMLAnchorElement>) => { onPointerLeave?.(event); clearTimeout(intentTimer.current); }}
+    onFocus={(event: FocusEvent<HTMLAnchorElement>) => { onFocus?.(event); prefetch(href); }}
+  />;
 }

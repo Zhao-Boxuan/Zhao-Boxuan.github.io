@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { PREPARE_PROJECT_COVER_EVENT, prepareCoverImage, projectCoverImage, rememberProjectCover } from '@/lib/projectImages';
 
 type AsciiProjectImageProps = {
   alt: string;
@@ -16,13 +17,15 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const nearViewportRef = useRef(false);
+  const preparedRef = useRef(false);
+  const cover = projectCoverImage(src);
   const [ready, setReady] = useState(false);
 
   const drawAscii = useCallback(() => {
     const frame = frameRef.current;
     const image = imageRef.current;
     const canvas = canvasRef.current;
-    if (!nearViewportRef.current || !frame || !image || !canvas || !image.complete || !image.naturalWidth) return;
+    if ((!nearViewportRef.current && !preparedRef.current) || !frame || !image || !canvas || !image.complete || !image.naturalWidth) return;
 
     const rect = frame.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
@@ -117,20 +120,27 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
   }, []);
 
   const scheduleDraw = useCallback(() => {
-    if (!nearViewportRef.current) return;
+    if (!nearViewportRef.current && !preparedRef.current) return;
     if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current);
     animationFrameRef.current = requestAnimationFrame(drawAscii);
   }, [drawAscii]);
 
   useEffect(() => {
     const frame = frameRef.current;
-    if (!frame) return undefined;
-    const observer = new ResizeObserver(scheduleDraw);
+    const image = imageRef.current;
+    if (!frame || !image) return undefined;
+    const prepare = () => { preparedRef.current = true; scheduleDraw(); };
+    const resize = () => {
+      if (preparedRef.current) prepareCoverImage(image, image.fetchPriority as 'high' | 'auto' | 'low');
+      scheduleDraw();
+    };
+    image.addEventListener(PREPARE_PROJECT_COVER_EVENT, prepare);
+    if (image.getAttribute('src')) prepare();
+    const observer = new ResizeObserver(resize);
     const visibilityObserver = new IntersectionObserver(([entry]) => {
       nearViewportRef.current = entry.isIntersecting;
       if (entry.isIntersecting) {
-        const image = imageRef.current;
-        if (image && !image.getAttribute('src')) image.src = src;
+        prepareCoverImage(image, image.fetchPriority === 'high' ? 'high' : 'auto');
         scheduleDraw();
       }
     }, { rootMargin: '600px 0px' });
@@ -139,13 +149,18 @@ export function AsciiProjectImage({ alt, src }: AsciiProjectImageProps) {
     return () => {
       observer.disconnect();
       visibilityObserver.disconnect();
+      image.removeEventListener(PREPARE_PROJECT_COVER_EVENT, prepare);
       if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current);
     };
   }, [scheduleDraw, src]);
 
   return (
     <div className={`project-ascii-image ${ready ? 'is-ready' : ''}`} ref={frameRef}>
-      <img ref={imageRef} data-src={src} alt={alt} decoding="async" onLoad={scheduleDraw} />
+      <img ref={imageRef} data-src={cover?.src ?? src} data-srcset={cover?.srcSet} alt={alt} decoding="async"
+        onLoad={() => {
+          if (cover) rememberProjectCover(cover.slug, imageRef.current!);
+          scheduleDraw();
+        }} />
       <canvas className="project-ascii-layer" ref={canvasRef} aria-hidden="true" />
     </div>
   );

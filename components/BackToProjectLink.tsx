@@ -2,6 +2,7 @@
 
 import type { MouseEvent } from 'react';
 import Link from 'next/link';
+import { warmStoredProjectCover } from '@/lib/projectImages';
 import { useProjectTransition } from '@/components/ProjectTransition';
 import {
   beginProjectReturn,
@@ -31,13 +32,17 @@ export function BackToProjectLink({ projectSlug }: { projectSlug: string }) {
         if (returnThroughHistory) clearProjectIndexHistory();
       },
       scroll: false,
+      returnProjectSlug: projectSlug,
     });
   };
 
   return (
     <Link
       className="brand"
-      href="/"
+      href={`/?return=${encodeURIComponent(projectSlug)}`}
+      prefetch={false}
+      onPointerEnter={() => warmStoredProjectCover(projectSlug)}
+      onFocus={() => warmStoredProjectCover(projectSlug)}
       onClick={returnToIndex}
       scroll={false}
     >
