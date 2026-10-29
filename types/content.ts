@@ -39,6 +39,8 @@ export interface Project {
 export interface ProjectMedia {
   src: string;
   caption: string;
+  width?: number;
+  height?: number;
 }
 
 export interface ProjectResearchSection {

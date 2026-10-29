@@ -221,7 +221,15 @@ export const projects: Project[] = [
     description: { en: 'VillaGE uses planting as the operating framework for rural renewal. A year-round crop calendar connects cultivation, processing, retail and visitor participation, while modular planting components adapt to ground, roofs, façades and leftover spaces. At masterplan scale, traffic, building renewal, infrastructure, landscape and productive routes are coordinated so residents, government and developers can share the value created by greener public space.', zh: 'VillaGE 以种植系统作为乡村更新的运行框架。全年作物日历连接种植、加工、零售与访客参与，模块化种植构件则适配地面、屋顶、立面和剩余空间；在总体规划尺度上，交通、建筑更新、基础设施、景观与生产路径被统一组织，使居民、政府与开发主体能够共享绿色公共空间创造的价值。' },
     year: '2020', role: { en: 'Urban research · Productive-landscape strategy · Typology development · Masterplanning', zh: '城市研究 · 生产性景观策略 · 类型设计 · 总体规划' }, status: 'documented', image: '/images/projects/village/cover.jpg', imageAlt: 'VillaGE planting experience village', accent: 'silver',
     tags: ['Rural Regeneration', 'Productive Landscape', 'Seasonal Cycles', 'Urban Typologies'],
-    gallery: media('village', ['Existing conditions, everyday use and spatial typologies across the urban village.', 'Productive planting strategy, seasonal crop cycles and adaptive spatial typologies.', 'Masterplan integrating traffic, building renewal, infrastructure, landscape and planting systems.']),
+    gallery: [
+      { src: '/images/projects/village/detail-01.jpg', caption: 'Existing conditions, everyday use and spatial typologies across the urban village.' },
+      { src: '/images/projects/village/detail-02.jpg', caption: 'Productive planting strategy, seasonal crop cycles and adaptive spatial typologies.' },
+      { src: '/images/projects/village/productive-cycle.webp', caption: 'Productive cycle connecting cultivation, processing, distribution and the V-FarmIE service app.', width: 2560, height: 1397 },
+      { src: '/images/projects/village/detail-03.jpg', caption: 'Masterplan integrating traffic, building renewal, infrastructure, landscape and planting systems.' },
+      { src: '/images/projects/village/flower-street.webp', caption: 'Flower Street — planting roofs, renewed street frontages and shared public space along Lushan South Road.', width: 2560, height: 1756 },
+      { src: '/images/projects/village/terraced-landscape.webp', caption: 'Terraced productive landscape connecting cultivated slopes, buildings and everyday village routes.', width: 2560, height: 1432 },
+      { src: '/images/projects/village/courtyard-gardens.webp', caption: 'Courtyard gardens, adaptable greenhouses and shared spaces within the renewed village.', width: 2560, height: 1432 },
+    ],
     researchSections: [
       { index: 'R1', title: 'Research premise', body: 'The project asks how tourism can reinforce productive rural life rather than replace it with a staged image of the countryside.' },
       { index: 'R2', title: 'Generative method', body: 'Crop characteristics, seasonal cycles and participation modes are translated into building and landscape types. Combinations of these types generate neighborhoods with distinct productive identities.' },

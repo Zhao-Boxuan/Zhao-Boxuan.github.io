@@ -225,8 +225,10 @@ export function StandardProjectDetail({ category, nextProject, project }: Standa
                 <img
                   alt={`${project.title.en} — ${sheet.caption}`}
                   decoding="async"
+                  height={sheet.height}
                   loading="lazy"
                   src={sheet.src}
+                  width={sheet.width}
                 />
               ) : (
                 <div
