@@ -792,7 +792,7 @@ export function TruthIncubatorDetail({ category, nextProject, project }: TruthIn
             <VideoPlaceholder
               code="05-A"
               poster="/images/projects/truth-incubator/video-posters/content-farm-interaction-interface.jpg"
-              src="/media/truth-incubator/videos/content-farm-interaction.mp4"
+              src="/media/truth-incubator/videos/content-farm-interaction-remake.mp4"
               summary="Gameplay demonstration: collect footage, edit a coherent and dramatic story, publish it, then repeat the operation with the same event."
               title="Gameplay Demonstration"
             />
